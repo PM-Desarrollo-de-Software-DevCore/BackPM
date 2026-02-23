@@ -10,7 +10,6 @@
     "module": "nodenext",
     "target": "esnext",
     "esModuleInterop": true,     // AGREGA ESTA LÍNEA (Vital para Express)
-    "types": [],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
