@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm"
+import { UserRole } from "../../../entities/User"
 
 @Entity("users")
 export class UserEntity {
@@ -11,6 +12,16 @@ export class UserEntity {
     @Column()
     password: string
 
+    @Column()
+    name: string
+
+    @Column()
+    lastname: string
+
+    @Column({ type: "varchar", length: 50, default: UserRole.DEVELOPER })
+    role: UserRole
+
     @CreateDateColumn()
     createdAt: Date
 }
+
