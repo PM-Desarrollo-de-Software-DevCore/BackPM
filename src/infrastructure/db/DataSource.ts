@@ -13,7 +13,7 @@ export const AppDataSource = new DataSource({
     synchronize: false,
     options: {
         encrypt: true,
-        trustServerCertificate: false,
+        trustServerCertificate: true,
     },
     entities: ["src/infrastructure/db/entities/*.ts"],
     migrations: ["src/infrastructure/db/migrations/*.ts"]
