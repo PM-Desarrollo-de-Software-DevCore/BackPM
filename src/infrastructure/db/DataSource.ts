@@ -1,7 +1,8 @@
 import "reflect-metadata"
-import dotenv from "dotenv"
 import { DataSource } from "typeorm";
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER } from "../../config/env";
+
+const isCompiled = __dirname.includes("dist");
 
 export const AppDataSource = new DataSource({
     type: "mssql",
@@ -15,8 +16,11 @@ export const AppDataSource = new DataSource({
         encrypt: true,
         trustServerCertificate: true,
     },
-    entities: ["src/infrastructure/db/entities/*.ts"],
-    migrations: ["src/infrastructure/db/migrations/*.ts"]
-})  
-
-    
+    // ✅ Usa .js en prod, .ts en dev
+    entities: [isCompiled 
+        ? __dirname + "/entities/*.js" 
+        : "src/infrastructure/db/entities/*.ts"],
+    migrations: [isCompiled 
+        ? __dirname + "/migrations/*.js" 
+        : "src/infrastructure/db/migrations/*.ts"],
+})
