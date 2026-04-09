@@ -1,6 +1,7 @@
 // Sirve para poder acceder a las variables de entorno
-import dotenv from "dotenv"
-dotenv.config()
+if (process.env.NODE_ENV !== "production") {
+    import("dotenv").then(dotenv => dotenv.config())
+}
 
 // Nos traemos las variables de entorno para que se puedan acceder en el codigo
 export const DB_HOST = process.env.DB_HOST!
