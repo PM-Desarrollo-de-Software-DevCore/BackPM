@@ -5,6 +5,7 @@ const registerSchema = z.object({
     email: z.string().email("Email invalido"),
     password: z.string().min(8, "La contraseña debe tener minimo 8 caracteres"),
     name: z.string().min(1,"El nombre es obligatorio"),
+    lastname: z.string().min(1, "El apellido es obligatorio"),
     role: z.enum(["admin","developer","scrum_master"], { message: "El rol es invalido" })
 })
 

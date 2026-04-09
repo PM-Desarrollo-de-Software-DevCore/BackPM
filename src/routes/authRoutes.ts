@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { validateLogin } from "../middlewares/validateLogin";
-import { registerController, loginController } from "../controllers/authController";
+import { registerController, loginController, meController } from "../controllers/authController";
 import { validateRegister } from "../middlewares/validateRegister";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router = Router()
 
@@ -69,5 +70,21 @@ router.post("/login", validateLogin, loginController)
  *         description: Registro fallido
  */
 router.post("/register", validateRegister, registerController)
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Obtener el usuario autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Usuario autenticado
+ *       401:
+ *         description: Token inválido o no proporcionado
+ */
+router.get("/me", requireAuth, meController)
 
 export default router
