@@ -15,8 +15,13 @@ export const requireAuth = (req: AuthenticatedRequest, res: Response, next: Next
 
     const token = authHeader.split(" ")[1]
 
+
+    if (!token) {
+        return res.status(401).json({ success: false, message: "Token no proporcionado" })
+    }
+    
     try {
-        const decoded = jwt.verify(token, JWT_SECRET)
+        const decoded = jwt.verify(token, JWT_SECRET!)
 
         if (typeof decoded === "string") {
             return res.status(401).json({ success: false, message: "Token invalido" })
