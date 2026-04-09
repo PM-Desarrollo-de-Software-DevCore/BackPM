@@ -1,6 +1,8 @@
 // Sirve para poder acceder a las variables de entorno
+import dotenv from "dotenv"
+
 if (process.env.NODE_ENV !== "production") {
-    import("dotenv").then(dotenv => dotenv.config())
+    dotenv.config()
 }
 
 // Nos traemos las variables de entorno para que se puedan acceder en el codigo
