@@ -18,3 +18,21 @@ export const saveUser = async (data: Omit<User, "id" | "createdAt">): Promise<Us
     const user = repo.create(data)
     return await repo.save(user)
 }
+
+export const findUserByResetToken = async (token: string): Promise<User | null> => {
+    return await repo.findOne({ where: { resetToken: token } })
+}
+
+export const updateResetToken = async (userId: string, token: string, expiry: Date): Promise<void> => {
+    await repo.update(userId, {
+        resetToken: token,
+        resetTokenExpiry: expiry
+    })
+}
+
+export const clearResetToken = async (userId: string): Promise<void> => {
+    await repo.update(userId, {
+        resetToken: null,
+        resetTokenExpiry: null
+    })
+}
