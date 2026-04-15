@@ -1,5 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, ForeignKey } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, ForeignKey, JoinColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
+import { SprintEntity } from "./SprintEntity"
+import { MemberProjectEntity } from "./MemberProjectEntity"
+import { TaskEntity } from "./TaskEntity"
 
 @Entity("projects")
 export class ProjectEntity {
@@ -7,30 +10,30 @@ export class ProjectEntity {
     id_proyecto: string
 
     @Column()
-    nombre: string
+    name: string
 
     @Column({ type: "text", nullable: true })
-    descripcion: string
+    description: string
 
     @Column({ type: "datetime2" })
-    fecha_inicio: Date
+    start_date: Date
 
     @Column({ type: "datetime2", nullable: true })
-    fecha_fin: Date | null
+    end_date: Date | null
 
-    @Column({ default: "activo" })
-    estado: string
+    @Column({ default: "active" })
+    status: string
+
+    @CreateDateColumn()
+    createdAt: Date
 
     // Foreign Key: creado_por (referencia a Usuario)
     @ManyToOne(() => UserEntity, (user) => user.projectsCreated)
     @JoinColumn({ name: "createdBy" })
-    createdBy: UserEntity
+    createdBy_id: UserEntity
 
     @Column("uuid")
-    creado_por: string
-
-    @CreateDateColumn()
-    createdAt: Date
+    createdBy: string
 
     // Relaciones inversas
     @OneToMany(() => MemberProjectEntity, (member) => member.project)

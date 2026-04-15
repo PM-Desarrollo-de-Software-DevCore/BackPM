@@ -2,29 +2,33 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColum
 import { ProjectEntity } from "./ProjectEntity"
 import { SprintEntity } from "./SprintEntity"
 import { UserEntity } from "./UserEntity"
+import { CommentEntity } from "./CommentEntity"
 
-@Entity("tareas")
+@Entity("task")
 export class TaskEntity {
     @PrimaryGeneratedColumn("uuid")
-    id_tarea: string
+    id_task: string
 
     @Column()
-    titulo: string
+    title: string
 
     @Column({ type: "text", nullable: true })
-    descripcion: string
+    description: string
 
     @Column()
-    prioridad: string
+    priority: string
 
-    @Column({ default: "pendiente" })
-    estado: string
+    @Column({ default: "pending" })
+    status: string
 
     @Column({ type: "datetime2" })
-    fecha_inicio: Date
+    start_date: Date
 
     @Column({ type: "datetime2", nullable: true })
-    fecha_fin: Date | null
+    end_date: Date | null
+
+    @CreateDateColumn()
+    createdAt: Date
 
     // Foreign Key: id_proyecto
     @ManyToOne(() => ProjectEntity, (project) => project.tasks, { onDelete: "CASCADE" })
@@ -45,7 +49,7 @@ export class TaskEntity {
     // Foreign Key: creado_por
     @ManyToOne(() => UserEntity, (user) => user.tasksCreated)
     @JoinColumn({ name: "createdBy" })
-    createdBy: UserEntity
+    createdBy_id: UserEntity
 
     @Column("uuid")
     createdBy: string
@@ -53,13 +57,10 @@ export class TaskEntity {
     // Foreign Key: asignado_a
     @ManyToOne(() => UserEntity, (user) => user.tasksAssigned, { nullable: true })
     @JoinColumn({ name: "assignedTo" })
-    assignedTo: UserEntity | null
+    assignedTo_id: UserEntity | null
 
     @Column("uuid", { nullable: true })
     assignedTo: string | null
-
-    @CreateDateColumn()
-    createdAt: Date
 
     // Relación inversa
     @OneToMany(() => CommentEntity, (comment) => comment.task)
