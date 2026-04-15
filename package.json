@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "migration:generate": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:generate -d 'src/infrastructure/db/DataSource.ts'",
     "migration:run": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:run -d 'src/infrastructure/db/DataSource.ts'",
+    "migration:revert": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:revert -d 'src/infrastructure/db/DataSource.ts'",
     "build": "tsc",
     "start": "node dist/app.js"
   },
@@ -14,19 +15,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^6.0.0",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.0",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mssql": "^12.2.1",
+    "resend": "^6.10.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28",
-    "zod": "^4.3.6"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/swagger-jsdoc": "^6.0.4",

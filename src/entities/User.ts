@@ -14,4 +14,6 @@ export interface User {
     lastname: string,
     role: UserRole,
     createdAt: Date
+    resetToken?: string | null,
+    resetTokenExpiry?: Date | null
 }
