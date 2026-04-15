@@ -1,5 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn , OneToMany } from "typeorm"
 import { UserRole } from "../../../entities/User"
+import { ProjectEntity } from "./ProjectEntity"
+import { MemberProjectEntity } from "./MemberProjectEntity"
+import { TaskEntity } from "./TaskEntity"
+import { CommentEntity } from "./CommentEntity"
 
 @Entity("users")
 export class UserEntity {
@@ -23,5 +27,27 @@ export class UserEntity {
 
     @CreateDateColumn()
     createdAt: Date
+
+    @Column({ type: "varchar", length: 255, nullable: true })
+    resetToken: string | null
+
+    @Column({ type: "datetime2", nullable: true })
+    resetTokenExpiry: Date | null
+
+     // Relaciones
+    @OneToMany(() => ProjectEntity, (project) => project.createdBy)
+    projectsCreated: ProjectEntity[]
+
+    @OneToMany(() => MemberProjectEntity, (member) => member.user)
+    memberProjects: MemberProjectEntity[]
+
+    @OneToMany(() => TaskEntity, (task) => task.createdBy)
+    tasksCreated: TaskEntity[]
+
+    @OneToMany(() => TaskEntity, (task) => task.assignedTo)
+    tasksAssigned: TaskEntity[]
+
+    @OneToMany(() => CommentEntity, (comment) => comment.user)
+    comments: CommentEntity[]
 }
 

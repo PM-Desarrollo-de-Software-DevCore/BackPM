@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { validateLogin } from "../middlewares/validateLogin";
-import { registerController, loginController, meController } from "../controllers/authController";
+import { registerController, loginController, meController, forgotPasswordController, resetPasswordController } from "../controllers/authController";
 import { validateRegister } from "../middlewares/validateRegister";
 import { requireAuth } from "../middlewares/requireAuth";
+import { validateResetPassword } from "../middlewares/validateResetPassword";
 
 const router = Router()
 
@@ -86,5 +87,51 @@ router.post("/register", validateRegister, registerController)
  *         description: Token inválido o no proporcionado
  */
 router.get("/me", requireAuth, meController)
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Solicitar reseteo de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email de reseteo enviado
+ */
+router.post("/forgot-password", forgotPasswordController)
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Resetear contraseña con token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               resetToken:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contraseña reseteada
+ */
+router.post("/reset-password", validateResetPassword, resetPasswordController)
 
 export default router
