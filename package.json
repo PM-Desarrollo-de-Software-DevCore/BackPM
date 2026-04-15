@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "migration:generate": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:generate -d 'src/infrastructure/db/DataSource.ts'",
     "migration:run": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:run -d 'src/infrastructure/db/DataSource.ts'",
+    "migration:revert": "ts-node -O '{\"module\":\"commonjs\"}' node_modules/typeorm/cli migration:revert -d 'src/infrastructure/db/DataSource.ts'",
     "build": "tsc",
     "start": "node dist/app.js"
   },

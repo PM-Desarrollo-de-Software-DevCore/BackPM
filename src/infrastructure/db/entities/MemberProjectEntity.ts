@@ -1,22 +1,28 @@
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
+import { UserEntity } from "./UserEntity"
+import { ProjectEntity } from "./ProjectEntity"
 
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn , OneToMany } from "typeorm"
-import { UserRole } from "../../../entities/User"
-
-@Entity("memberProject")
-export class UserEntity {
+@Entity("member_project")
+export class MemberProjectEntity {
     @PrimaryGeneratedColumn("uuid")
-    id_memberproject: string
+    id_mp: string
 
-    @Column()
+    // Foreign Key: id_usuario
+    @ManyToOne(() => UserEntity, (user) => user.memberProjects, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "id_user" })
+    user: UserEntity
+
+    @Column("uuid")
     id_user: string
 
-    @Column()
+    // Foreign Key: id_proyecto
+    @ManyToOne(() => ProjectEntity, (project) => project.members, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "id_project" })
+    project: ProjectEntity
+
+    @Column("uuid")
     id_project: string
-    
-    @Column()
+
+    @Column({ type: "varchar", length: 50 })
     role: string
-
-
-    
 }
-
