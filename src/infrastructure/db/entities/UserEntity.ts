@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn , OneToMany } from "typeorm"
-import { UserRole } from "../../../entities/User"
+import { GlobalRole } from "../../../entities/User"
 import { ProjectEntity } from "./ProjectEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
@@ -10,7 +10,7 @@ export class UserEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string
 
-    @Column({ unique: true })
+    @Column({ type: "varchar", unique: true })
     email: string
 
     @Column()
@@ -22,8 +22,8 @@ export class UserEntity {
     @Column()
     lastname: string
 
-    @Column({ type: "varchar", length: 50, default: UserRole.DEVELOPER })
-    role: UserRole
+    @Column({ type: "varchar", enum: GlobalRole, default: GlobalRole.USER })
+    globalRole: GlobalRole
 
     @CreateDateColumn()
     createdAt: Date

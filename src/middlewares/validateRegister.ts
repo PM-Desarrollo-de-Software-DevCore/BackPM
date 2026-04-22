@@ -6,7 +6,13 @@ const registerSchema = z.object({
     password: z.string().min(8, "La contraseña debe tener minimo 8 caracteres"),
     name: z.string().min(1,"El nombre es obligatorio"),
     lastname: z.string().min(1, "El apellido es obligatorio"),
-    role: z.enum(["admin","developer","scrum_master"], { message: "El rol es invalido" })
+    globalRole: z.enum(["admin", "user"], { message: "El rol global es invalido" }).optional(),
+    role: z.enum(["admin", "user"], { message: "El rol es invalido" }).optional()
+})
+
+.refine((data) => Boolean(data.globalRole || data.role), {
+    message: "Debes enviar globalRole o role",
+    path: ["globalRole"]
 })
 
 export const validateRegister = ( req: Request, res: Response, next: NextFunction) => {
