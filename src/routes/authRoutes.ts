@@ -60,9 +60,10 @@ router.post("/login", validateLogin, loginController)
  *               lastname:
  *                 type: string
  *                 example: "Pantera"
- *               role: 
+ *               globalRole:
  *                 type: string
- *                 example: "developer"
+ *                 enum: [admin, user]
+ *                 example: "user"
  * 
  *     responses:
  *       200:

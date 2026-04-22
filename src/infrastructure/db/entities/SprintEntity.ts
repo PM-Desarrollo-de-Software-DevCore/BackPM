@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from "typeorm"
 import { ProjectEntity } from "./ProjectEntity"
 import { TaskEntity } from "./TaskEntity"
+import { SprintStatus } from "../../../entities/Sprint"
 
 @Entity("sprints")
 export class SprintEntity {
@@ -16,8 +17,8 @@ export class SprintEntity {
     @Column({ type: "datetime2" })
     end_date: Date
 
-    @Column({ default: "planned" })
-    status: string
+    @Column({ type: "varchar", default: SprintStatus.PLANNED })
+    status: SprintStatus
 
     @CreateDateColumn()
     createdAt: Date

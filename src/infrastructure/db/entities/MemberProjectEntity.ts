@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { ProjectEntity } from "./ProjectEntity"
+import { ProjectRole } from "../../../entities/MemberProject"
 
 @Entity("member_project")
 export class MemberProjectEntity {
@@ -23,6 +24,9 @@ export class MemberProjectEntity {
     @Column("uuid")
     id_project: string
 
-    @Column({ type: "varchar", length: 50 })
-    role: string
+    @Column({ type: "varchar", length: 50, default: ProjectRole.DEVELOPER })
+    role: ProjectRole
+
+    @CreateDateColumn()
+    createdAt: Date
 }

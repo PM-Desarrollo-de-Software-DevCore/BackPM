@@ -73,7 +73,7 @@ projects                ❌ NO se llena sola → POST /projects
 POST   /projects
    Body: { nombre, descripcion, fecha_inicio, fecha_fin }
    Response: { id_project, nombre, ... }
-   
+  
 GET    /projects
    Query: ?estado=activo&sort=fecha_inicio
    Response: { projects: [...] }
