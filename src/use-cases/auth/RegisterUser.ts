@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt"
 import { saveUser, findUserByEmail } from "../../infrastructure/repositories/UserRepository"
-import { UserRole } from "../../entities/User"
+import { GlobalRole } from "../../entities/User"
 
 
-export const registerUser = async (email: string, password: string, name: string, lastname: string, role: UserRole) => {
+export const registerUser = async (email: string, password: string, name: string, lastname: string, globalRole: GlobalRole) => {
 
     // Se busca el email
     const existing = await findUserByEmail(email)
@@ -17,8 +17,8 @@ export const registerUser = async (email: string, password: string, name: string
         password: hashedPassword,
         name,
         lastname,
-        role,
+        globalRole
     })
 
-    return  { id: user.id, email: user.email, name: user.name, lastname: user.lastname, role: user.role }
+    return  { id: user.id, email: user.email, name: user.name, lastname: user.lastname, role: user.globalRole }
 }
