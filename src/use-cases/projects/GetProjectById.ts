@@ -1,4 +1,4 @@
-import { getProjectById } from "../../infrastructure/repositories/projectRepository"
+import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 
 export const getProjectByIdUseCase = async (projectId: string, userId: string) => {
