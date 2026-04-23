@@ -16,10 +16,18 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
 export const getProjectsByUser = async (userId: string): Promise<Project[]> => {
     return await repo
         .createQueryBuilder("project")
-        .leftJoin("project.members", "member")
         .where("project.createdBy = :userId", { userId })
-        .orWhere("member.id_user = :userId", { userId })
-        .distinct(true)
+        .orWhere((qb) => {
+            const subQuery = qb
+                .subQuery()
+                .select("1")
+                .from("member_project", "mp")
+                .where("mp.id_project = project.id_project")
+                .andWhere("mp.id_user = :userId")
+                .getQuery()
+
+            return `EXISTS ${subQuery}`
+        })
         .orderBy("project.createdAt", "DESC")
         .getMany()
 }

@@ -13,7 +13,7 @@ export class ProjectEntity {
     @Column()
     name: string
 
-    @Column({ type: "text", nullable: true })
+    @Column({ type: "varchar", length: "MAX", nullable: true })
     description: string | null
 
     @Column({ type: "datetime2" })
