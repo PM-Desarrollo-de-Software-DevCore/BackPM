@@ -1,4 +1,4 @@
-import { createProject } from "../../infrastructure/repositories/projectRepository"
+import { createProject } from "../../infrastructure/repositories/ProjectRepository"
 import { addMemberToProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { Project, ProjectStatus } from "../../entities/Project"
 import { ProjectRole } from "../../entities/MemberProject"
@@ -16,8 +16,6 @@ export const createProjectUseCase = async (name: string,description: string | nu
         status,
         createdBy: userId
     })
-
-    await addMemberToProject(userId, project.id_project, ProjectRole.PROJECT_MANAGER)
 
     return project
 }
