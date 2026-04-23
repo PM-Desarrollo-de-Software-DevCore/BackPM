@@ -1,7 +1,5 @@
 import { createProject } from "../../infrastructure/repositories/ProjectRepository"
-import { addMemberToProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { Project, ProjectStatus } from "../../entities/Project"
-import { ProjectRole } from "../../entities/MemberProject"
 
 export const createProjectUseCase = async (name: string,description: string | null,start_date: Date,end_date: Date | null,status: ProjectStatus,userId: string): Promise<Project> => {
     if (end_date && start_date > end_date) {
