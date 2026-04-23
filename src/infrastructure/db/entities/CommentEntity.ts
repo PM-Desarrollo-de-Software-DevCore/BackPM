@@ -7,7 +7,7 @@ export class CommentEntity {
     @PrimaryGeneratedColumn("uuid")
     id_comment: string
 
-    @Column({ type: "text" })
+    @Column({ type: "varchar", length: "MAX" })
     comment: string
 
     // Foreign Key: id_usuario
