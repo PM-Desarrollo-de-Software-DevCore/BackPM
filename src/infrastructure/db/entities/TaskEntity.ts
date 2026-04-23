@@ -14,7 +14,7 @@ export class TaskEntity {
     @Column()
     title: string
 
-    @Column({ type: "text", nullable: true })
+    @Column({ type: "varchar", length: "MAX", nullable: true })
     description: string
 
     @Column({ type: 'varchar', enum: TaskStatus, default: TaskStatus.PENDING })
