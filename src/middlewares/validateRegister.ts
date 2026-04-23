@@ -7,10 +7,9 @@ const registerSchema = z.object({
     name: z.string().min(1,"El nombre es obligatorio"),
     lastname: z.string().min(1, "El apellido es obligatorio"),
     globalRole: z.enum(["admin", "user"], { message: "El rol global es invalido" }).optional(),
-    role: z.enum(["admin", "user"], { message: "El rol es invalido" }).optional()
 })
 
-.refine((data) => Boolean(data.globalRole || data.role), {
+.refine((data) => Boolean(data.globalRole), {
     message: "Debes enviar globalRole o role",
     path: ["globalRole"]
 })

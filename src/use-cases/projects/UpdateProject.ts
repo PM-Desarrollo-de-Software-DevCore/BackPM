@@ -1,4 +1,4 @@
-import { updateProject, getProjectById } from "../../infrastructure/repositories/projectRepository"
+import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { ProjectStatus } from "../../entities/Project"
 
