@@ -1,4 +1,4 @@
-import { deleteProject, getProjectById } from "../../infrastructure/repositories/projectRepository"
+import { deleteProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 
 export const deleteProjectUseCase = async (projectId: string, userId: string) => {
     const project = await getProjectById(projectId)
