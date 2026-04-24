@@ -34,6 +34,15 @@ export class UserEntity {
     @Column({ type: "datetime2", nullable: true })
     resetTokenExpiry: Date | null
 
+    @Column({ type: "varchar", length: 100, nullable: true })
+    skill: string | null
+
+    @Column({ type: "varchar", length: 100, nullable: true })
+    area: string | null
+
+    @Column({ type: "varchar", length: 20, nullable: true })
+    phoneNumber: string | null
+
      // Relaciones
     @OneToMany(() => ProjectEntity, (project) => project.createdBy)
     projectsCreated: ProjectEntity[]
