@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from "../middlewares/requireAuth";
 import { success } from "zod/v4";
 import { forgotPassword } from "../use-cases/auth/ForgotPassword";
 import { resetPassword } from "../use-cases/auth/ResetPassword";
+import { processCV } from "../use-cases/auth/ProcessCV";
 
 
 export const loginController = async (req: Request, res: Response) => {
@@ -63,6 +64,23 @@ export const resetPasswordController = async (req: Request, res: Response) => {
         const result = await resetPassword(resetToken, newPassword);
         res.status(200).json({ succes: true, data: result });
     } catch (error: any){
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+export const uploadCVController = async (req: Request, res: Response) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        if (req.file.mimetype !== 'application/pdf') {
+            return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
+        }
+
+        const cvData = await processCV(req.file.buffer);
+        res.status(200).json({ success: true, data: cvData });
+    } catch (error: any) {
         res.status(400).json({ success: false, message: error.message });
     }
 };
