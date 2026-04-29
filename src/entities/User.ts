@@ -1,9 +1,6 @@
-import { NumericType } from "typeorm"
-
-export enum UserRole {
+export enum GlobalRole {
     ADMIN =  "admin",
-    DEVELOPER = "developer",
-    SCRUM_MASTER = "scrum_master"
+    USER = "user"
 }
 
 export interface User {
@@ -12,7 +9,7 @@ export interface User {
     password: string,
     name: string,
     lastname: string,
-    role: UserRole,
+    globalRole: GlobalRole,
     createdAt: Date
     resetToken?: string | null,
     resetTokenExpiry?: Date | null

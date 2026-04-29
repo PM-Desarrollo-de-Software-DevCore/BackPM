@@ -3,17 +3,18 @@ import { UserEntity } from "./UserEntity"
 import { SprintEntity } from "./SprintEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
+import { ProjectStatus } from "../../../entities/Project"
 
 @Entity("projects")
 export class ProjectEntity {
     @PrimaryGeneratedColumn("uuid")
-    id_proyecto: string
+    id_project: string
 
     @Column()
     name: string
 
-    @Column({ type: "text", nullable: true })
-    description: string
+    @Column({ type: "varchar", length: "MAX", nullable: true })
+    description: string | null
 
     @Column({ type: "datetime2" })
     start_date: Date
@@ -21,8 +22,8 @@ export class ProjectEntity {
     @Column({ type: "datetime2", nullable: true })
     end_date: Date | null
 
-    @Column({ default: "active" })
-    status: string
+    @Column({ type: "varchar", enum: ProjectStatus, default: ProjectStatus.ACTIVE })
+    status: ProjectStatus
 
     @CreateDateColumn()
     createdAt: Date
