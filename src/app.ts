@@ -3,6 +3,7 @@ import cors from "cors"
 import { AppDataSource } from "./infrastructure/db/DataSource"
 import authRoutes from "./routes/authRoutes"
 import projectRoutes from "./routes/projectRoutes"
+import userRoutes from "./routes/userRoutes"
 import swaggerUi from "swagger-ui-express"
 import { swaggerSpec } from "./config/swagger"
 import { PORT } from "./config/env"
@@ -16,6 +17,7 @@ app.use(express.json())
 app.use("/auth", authRoutes)
 app.use("/projects", projectRoutes)
 app.use("/projects", memberRoutes)
+app.use("/users", userRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 AppDataSource.initialize()
