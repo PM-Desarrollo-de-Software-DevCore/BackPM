@@ -12,6 +12,6 @@ export const getCurrentUser = async (userId: string) => {
         email: user.email,
         name: user.name,
         lastname: user.lastname,
-        role: user.role,
+        role: user.globalRole,
     }
 }

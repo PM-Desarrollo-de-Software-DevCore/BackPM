@@ -20,8 +20,9 @@ export const loginController = async (req: Request, res: Response) => {
 
 export const registerController = async (req: Request, res: Response) => {
     try {
-        const { email,password,name,lastname,role } = req.body
-        const result = await registerUser(email, password, name, lastname, role)
+        const { email, password, name, lastname, globalRole, role } = req.body
+        const normalizedRole = globalRole ?? role
+        const result = await registerUser(email, password, name, lastname, normalizedRole)
         res.status(200).json({ success: true, data: result})
     } catch (error: any) {
         res.status(401).json({ success: false, message: error.message })

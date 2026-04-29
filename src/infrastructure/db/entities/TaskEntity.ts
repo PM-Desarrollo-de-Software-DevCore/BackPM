@@ -3,6 +3,8 @@ import { ProjectEntity } from "./ProjectEntity"
 import { SprintEntity } from "./SprintEntity"
 import { UserEntity } from "./UserEntity"
 import { CommentEntity } from "./CommentEntity"
+import { TaskPriority } from "../../../entities/Task"
+import { TaskStatus } from "../../../entities/Task"
 
 @Entity("task")
 export class TaskEntity {
@@ -12,14 +14,14 @@ export class TaskEntity {
     @Column()
     title: string
 
-    @Column({ type: "text", nullable: true })
+    @Column({ type: "varchar", length: "MAX", nullable: true })
     description: string
 
-    @Column()
-    priority: string
+    @Column({ type: 'varchar', enum: TaskStatus, default: TaskStatus.PENDING })
+    status: TaskStatus
 
-    @Column({ default: "pending" })
-    status: string
+    @Column({ type: 'varchar', enum: TaskPriority, default: TaskPriority.MEDIUM })
+    priority: TaskPriority
 
     @Column({ type: "datetime2" })
     start_date: Date
