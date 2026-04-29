@@ -2,14 +2,6 @@ import { AppDataSource } from "../db/DataSource"
 import { SprintEntity } from "../db/entities/SprintEntity"
 import { Sprint } from "../../entities/Sprint"
 
-// Este archivo va a tener métodos como:
-// - createSprint(data)
-// - getSprintById(id)
-// - getSprintsByProject(projectId)
-// - updateSprint(id, data)
-// - deleteSprint(id)
-
-// Hacer un select de la tabla user
 const repo = AppDataSource.getRepository(SprintEntity)
 
 export const createSprint = async (data: Omit<Sprint, "id_sprint" | "createdAt">): Promise<Sprint> => {
@@ -21,15 +13,16 @@ export const getSprintById = async (id: string): Promise<Sprint | null> => {
     return await repo.findOne({ where: { id_sprint: id } })
 }
 
-export const getSprintByProject = async (projectId: string): Promise<Sprint | null> => {
-    return await repo.findOne({ where: { id_project: projectId } })
+export const getSprintsByProject = async (projectId: string): Promise<Sprint[]> => {
+    return await repo.find({ where: { id_project: projectId }, order: { createdAt: "DESC" } })
 }
 
-export const updateSprint = async (id: string, data: Partial<Omit<Sprint, "id_sprint" | "createdAt">>): Promise<void> => {
+export const updateSprint = async (id: string, data: Partial<Omit<Sprint, "id_sprint" | "createdAt">>): Promise<Sprint | null> => {
     await repo.update({ id_sprint: id }, data)
+    return await getSprintById(id)
 }
 
-export const deleteSprint = async (id: string): Promise<void> => {
-    await repo.delete({ id_sprint: id })
+export const deleteSprint = async (id: string): Promise<boolean> => {
+    const result = await repo.delete({ id_sprint: id })
+    return (result.affected ?? 0) > 0
 }
-

@@ -23,10 +23,10 @@ const router = Router()
  *             properties:
  *               email:
  *                 type: string
- *                 example: juan@gmail.com
+ *                 example: admin2@gmail.com
  *               password:
  *                 type: string
- *                 example: "1234"
+ *                 example: "12345678"
  *     responses:
  *       200:
  *         description: Login exitoso, devuelve el token

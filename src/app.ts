@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express"
 import { swaggerSpec } from "./config/swagger"
 import { PORT } from "./config/env"
 import memberRoutes from "./routes/memberRoutes"
+import sprintRoutes from "./routes/sprintRoutes"
 
 const app = express()
 
@@ -16,6 +17,8 @@ app.use(express.json())
 app.use("/auth", authRoutes)
 app.use("/projects", projectRoutes)
 app.use("/projects", memberRoutes)
+app.use("/projects", sprintRoutes)  // Cambiar esta línea
+app.use("/sprints", sprintRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 AppDataSource.initialize()
