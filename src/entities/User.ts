@@ -12,5 +12,8 @@ export interface User {
     globalRole: GlobalRole,
     createdAt: Date
     resetToken?: string | null,
-    resetTokenExpiry?: Date | null
+    resetTokenExpiry?: Date | null,
+    skill?: string | null,
+    area?: string | null,
+    phoneNumber?: string | null
 }
