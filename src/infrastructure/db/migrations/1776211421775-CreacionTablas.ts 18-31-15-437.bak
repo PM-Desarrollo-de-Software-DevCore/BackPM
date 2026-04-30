@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class CreacionTablas1776211421775 implements MigrationInterface {
-    name = 'CreacionTablas1776211421775'
+export class CreacionTablas177621 implements MigrationInterface {
+    name = 'CreacionTablas177621'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "comentarios" ("id_comment" uniqueidentifier NOT NULL CONSTRAINT "DF_57745cd3194862f5a4954afb3a5" DEFAULT NEWSEQUENTIALID(), "comment" text NOT NULL, "id_user" uniqueidentifier NOT NULL, "id_task" uniqueidentifier NOT NULL, "createdAt" datetime2 NOT NULL CONSTRAINT "DF_1154922fc4ef1dd820f20947d4e" DEFAULT getdate(), CONSTRAINT "PK_57745cd3194862f5a4954afb3a5" PRIMARY KEY ("id_comment"))`);

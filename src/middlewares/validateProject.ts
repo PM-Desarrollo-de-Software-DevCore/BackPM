@@ -5,10 +5,11 @@ const createProjectSchema = z.object({
     name: z.string().min(1, "El nombre es obligatorio"),
     description: z.string().optional().nullable(),
     start_date: z.coerce.date({ message: "start_date invalida" }),
-    end_date: z.coerce.date({ message: "end_date invalida" }).optional().nullable(),
-    status: z.enum(["active", "finished", "paused"]).optional()
+    end_date: z.coerce.date({ message: "end_date invalida" }),
+    priority: z.enum(["high", "medium", "low"], { message: "La prioridad es invalida" }).optional(),
+    status: z.enum(["planning", "in_progress", "completed"], { message: "El status es invalido" })
 }).refine(
-    (data) => !data.end_date || data.start_date <= data.end_date,
+    (data) => data.start_date <= data.end_date,
     { message: "La fecha de inicio debe ser anterior a la fecha de fin", path: ["end_date"] }
 )
 
@@ -17,7 +18,8 @@ const updateProjectSchema = z.object({
     description: z.string().optional().nullable(),
     start_date: z.coerce.date({ message: "start_date invalida" }).optional(),
     end_date: z.coerce.date({ message: "end_date invalida" }).optional().nullable(),
-    status: z.enum(["active", "finished", "paused"]).optional()
+    priority: z.enum(["high", "medium", "low"], { message: "La prioridad es invalida" }).optional(),
+    status: z.enum(["planning", "in_progress", "completed"], { message: "El status es invalido" }).optional()
 }).refine(
     (data) => !(data.start_date && data.end_date) || data.start_date <= data.end_date,
     { message: "La fecha de inicio debe ser anterior a la fecha de fin", path: ["end_date"] }
