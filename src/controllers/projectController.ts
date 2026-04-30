@@ -1,11 +1,11 @@
 import { Response } from "express"
 import { AuthenticatedRequest } from "../middlewares/requireAuth"
-import { ProjectStatus } from "../entities/Project"
 import { createProjectUseCase } from "../use-cases/projects/CreateProject"
 import { getMyProjectsUseCase } from "../use-cases/projects/GetMyProjects"
 import { getProjectByIdUseCase } from "../use-cases/projects/GetProjectById"
 import { updateProjectUseCase } from "../use-cases/projects/UpdateProject"
 import { deleteProjectUseCase } from "../use-cases/projects/DeleteProject"
+import { ProjectPriority, ProjectStatus } from "../entities/Project"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -13,14 +13,15 @@ export const createProjectController = async (req: AuthenticatedRequest, res: Re
             return res.status(401).json({ success: false, message: "Token invalido" })
         }
 
-        const { name, description, start_date, end_date, status } = req.body
+        const { name, description, start_date, end_date, priority, status } = req.body
 
         const result = await createProjectUseCase(
             name,
             description,
             new Date(start_date),
             end_date ? new Date(end_date) : null,
-            status ?? ProjectStatus.ACTIVE,
+            priority ?? ProjectPriority.MEDIUM,
+            status ?? ProjectStatus.PLANNING,
             req.userId
         )
 

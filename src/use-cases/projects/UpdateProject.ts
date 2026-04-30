@@ -1,13 +1,16 @@
 import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
-import { ProjectStatus } from "../../entities/Project"
+import { ProjectPriority, ProjectStatus } from "../../entities/Project"
 
-export const updateProjectUseCase = async (projectId: string,userId: string,
+export const updateProjectUseCase = async (
+    projectId: string,
+    userId: string,
     data: {
         name?: string
         description?: string | null
         start_date?: Date
         end_date?: Date | null
+        priority?: ProjectPriority
         status?: ProjectStatus
     }
 ) => {
@@ -39,5 +42,3 @@ export const updateProjectUseCase = async (projectId: string,userId: string,
 
     return updated
 }
-
-// 

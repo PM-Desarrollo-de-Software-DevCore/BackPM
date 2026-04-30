@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, ForeignKey, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { SprintEntity } from "./SprintEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
-import { ProjectStatus } from "../../../entities/Project"
+import { ProjectStatus, ProjectPriority } from "../../../entities/Project"
 
 @Entity("projects")
 export class ProjectEntity {
@@ -22,13 +22,15 @@ export class ProjectEntity {
     @Column({ type: "datetime2", nullable: true })
     end_date: Date | null
 
-    @Column({ type: "varchar", enum: ProjectStatus, default: ProjectStatus.ACTIVE })
+    @Column({ type: "varchar", enum: ProjectPriority, default: ProjectPriority.MEDIUM })
+    priority: ProjectPriority
+
+    @Column({ type: "varchar", enum: ProjectStatus, default: ProjectStatus.PLANNING })
     status: ProjectStatus
 
     @CreateDateColumn()
     createdAt: Date
 
-    // Foreign Key: creado_por (referencia a Usuario)
     @ManyToOne(() => UserEntity, (user) => user.projectsCreated)
     @JoinColumn({ name: "createdBy" })
     createdBy_id: UserEntity
@@ -36,7 +38,6 @@ export class ProjectEntity {
     @Column("uuid")
     createdBy: string
 
-    // Relaciones inversas
     @OneToMany(() => MemberProjectEntity, (member) => member.project)
     members: MemberProjectEntity[]
 

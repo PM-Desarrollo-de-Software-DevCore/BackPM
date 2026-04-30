@@ -25,7 +25,7 @@ const router = Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, start_date]
+ *             required: [name, start_date, end_date, status]
  *             properties:
  *               name:
  *                 type: string
@@ -39,17 +39,22 @@ const router = Router()
  *               end_date:
  *                 type: string
  *                 format: date-time
- *                 nullable: true
+ *               priority:
+ *                 type: string
+ *                 enum: [high, medium, low]
+ *                 example: "medium"
+ *                 default: "medium"
  *               status:
  *                 type: string
- *                 enum: [active, finished, paused]
+ *                 enum: [planning, in_progress, completed]
+ *                 example: "planning"
  *     responses:
  *       201:
  *         description: Proyecto creado correctamente
  *       400:
  *         description: Error de validacion
  *       401:
- *         description: Token invalido
+ *         description: Token invalido o solo administradores pueden crear proyectos
  */
 router.post("/", requireAuth, validateCreateProject, createProjectController)
 
@@ -126,14 +131,19 @@ router.get("/:projectId", requireAuth, getProjectByIdController)
  *                 type: string
  *                 format: date-time
  *                 nullable: true
+ *               priority:
+ *                 type: string
+ *                 enum: [high, medium, low]
  *               status:
  *                 type: string
- *                 enum: [active, finished, paused]
+ *                 enum: [planning, in_progress, completed]
  *     responses:
  *       200:
- *         description: Proyecto actualizado
+ *         description: Proyecto actualizado correctamente
  *       400:
  *         description: Error de validacion o permisos
+ *       404:
+ *         description: Proyecto no encontrado
  */
 router.put("/:projectId", requireAuth, validateUpdateProject, updateProjectController)
 
