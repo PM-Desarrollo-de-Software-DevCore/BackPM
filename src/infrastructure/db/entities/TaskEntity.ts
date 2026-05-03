@@ -17,6 +17,12 @@ export class TaskEntity {
     @Column({ type: "varchar", length: "MAX", nullable: true })
     description: string | null
 
+    @Column({ type: "int" })
+    task_number: number
+
+    @Column({ type: "int", default: 0 })
+    progress: number
+
     @Column({ type: 'varchar', enum: TaskStatus, default: TaskStatus.PENDING })
     status: TaskStatus
 

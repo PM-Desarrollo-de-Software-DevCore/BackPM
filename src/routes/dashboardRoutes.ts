@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -188,5 +188,82 @@ router.get("/projects-stats", requireAuth, getProjectsStatsController)
  *         description: Token invalido o no proporcionado
  */
 router.get("/tasks-stats", requireAuth, getTasksStatsController)
+
+/**
+ * @swagger
+ * /dashboard/user-tasks:
+ *   get:
+ *     summary: Listar las tareas del usuario autenticado con info de proyecto y atrasos
+ *     description: |
+ *       Devuelve las tareas donde el usuario autenticado es el `assignedTo`,
+ *       con el nombre del proyecto al que pertenecen y el flag `isOverdue`.
+ *       Soporta filtros opcionales por `status` y `priority`.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [pending, in_progress, completed]
+ *       - in: query
+ *         name: priority
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high]
+ *     responses:
+ *       200:
+ *         description: Lista calculada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total: { type: integer, example: 4 }
+ *                     tasks:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id_task: { type: string, format: uuid }
+ *                           title: { type: string }
+ *                           description: { type: string, nullable: true }
+ *                           task_number: { type: integer }
+ *                           progress: { type: integer }
+ *                           priority:
+ *                             type: string
+ *                             enum: [low, medium, high]
+ *                           status:
+ *                             type: string
+ *                             enum: [pending, in_progress, completed]
+ *                           start_date: { type: string, format: date-time }
+ *                           end_date:
+ *                             type: string
+ *                             format: date-time
+ *                             nullable: true
+ *                           project:
+ *                             type: object
+ *                             nullable: true
+ *                             properties:
+ *                               id_project: { type: string, format: uuid }
+ *                               name: { type: string }
+ *                           isOverdue:
+ *                             type: boolean
+ *                             description: end_date pasado y status != completed
+ *       400:
+ *         description: Filtros invalidos
+ *       401:
+ *         description: No autorizado
+ */
+router.get("/user-tasks", requireAuth, getUserTasksController)
 
 export default router
