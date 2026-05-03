@@ -11,6 +11,7 @@ import memberRoutes from "./routes/memberRoutes"
 import sprintRoutes from "./routes/sprintRoutes"
 import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRoutes"
 import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
+import dashboardRoutes from "./routes/dashboardRoutes"
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.use("/tasks", taskRouter)
 app.use("/tasks", taskCommentRouter)
 app.use("/comments", commentRouter)
 app.use("/users", userRoutes)
+app.use("/dashboard", dashboardRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 AppDataSource.initialize()
