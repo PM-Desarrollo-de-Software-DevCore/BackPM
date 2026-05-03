@@ -10,6 +10,8 @@ export const updateTaskUseCase = async (
     data: {
         title?: string
         description?: string | null
+        task_number?: number
+        progress?: number
         priority?: TaskPriority
         status?: TaskStatus
         start_date?: Date
@@ -35,6 +37,18 @@ export const updateTaskUseCase = async (
     const newEnd = data.end_date !== undefined ? data.end_date : task.end_date
     if (newEnd && newStart > newEnd) {
         throw new Error("La fecha de inicio debe ser anterior a la fecha de fin")
+    }
+
+    if (data.task_number !== undefined) {
+        if (!Number.isInteger(data.task_number) || data.task_number < 1) {
+            throw new Error("El número de tarea debe ser un entero mayor o igual a 1")
+        }
+    }
+
+    if (data.progress !== undefined) {
+        if (!Number.isFinite(data.progress) || data.progress < 0 || data.progress > 100) {
+            throw new Error("El progreso debe estar entre 0 y 100")
+        }
     }
 
     if (data.id_sprint) {
