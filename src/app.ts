@@ -9,6 +9,7 @@ import { swaggerSpec } from "./config/swagger"
 import { PORT } from "./config/env"
 import memberRoutes from "./routes/memberRoutes"
 import sprintRoutes from "./routes/sprintRoutes"
+import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRoutes"
 
 const app = express()
 
@@ -19,7 +20,10 @@ app.use("/auth", authRoutes)
 app.use("/projects", projectRoutes)
 app.use("/projects", memberRoutes)
 app.use("/projects", sprintRoutes)  // Cambiar esta línea
+app.use("/projects", projectTaskRouter)
 app.use("/sprints", sprintRoutes)
+app.use("/sprints", sprintTaskRouter)
+app.use("/tasks", taskRouter)
 app.use("/users", userRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
