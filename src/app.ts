@@ -10,6 +10,7 @@ import { PORT } from "./config/env"
 import memberRoutes from "./routes/memberRoutes"
 import sprintRoutes from "./routes/sprintRoutes"
 import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRoutes"
+import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
 
 const app = express()
 
@@ -24,6 +25,8 @@ app.use("/projects", projectTaskRouter)
 app.use("/sprints", sprintRoutes)
 app.use("/sprints", sprintTaskRouter)
 app.use("/tasks", taskRouter)
+app.use("/tasks", taskCommentRouter)
+app.use("/comments", commentRouter)
 app.use("/users", userRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
