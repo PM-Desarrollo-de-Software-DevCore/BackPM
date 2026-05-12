@@ -14,3 +14,4 @@ export const DB_NAME = process.env.DB_NAME!
 export const JWT_SECRET = process.env.JWT_SECRET!
 export const PORT = process.env.PORT || 3001
 export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
+export const CLOUDINARY_URL = process.env.CLOUDINARY_URL!
