@@ -22,7 +22,7 @@ export class ProjectEntity {
     @Column({ type: "datetime2", nullable: true })
     end_date: Date | null
 
-    @Column({ type: "varchar", enum: ProjectPriority, default: ProjectPriority.MEDIUM })
+    @Column({ type: "varchar", length: 20, enum: ProjectPriority, default: ProjectPriority.MEDIUM })
     priority: ProjectPriority
 
     @Column({ type: "varchar", enum: ProjectStatus, default: ProjectStatus.PLANNING })
