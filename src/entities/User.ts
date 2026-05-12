@@ -15,5 +15,6 @@ export interface User {
     resetTokenExpiry?: Date | null,
     skill?: string | null,
     area?: string | null,
-    phoneNumber?: string | null
+    phoneNumber?: string | null,
+    profileImageUrl?: string | null
 }

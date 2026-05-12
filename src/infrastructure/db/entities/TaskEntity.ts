@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, Check } from "typeorm"
 import { ProjectEntity } from "./ProjectEntity"
 import { SprintEntity } from "./SprintEntity"
 import { UserEntity } from "./UserEntity"
@@ -7,6 +7,7 @@ import { TaskPriority } from "../../../entities/Task"
 import { TaskStatus } from "../../../entities/Task"
 
 @Entity("task")
+@Check("CHK_task_progress_range", `"progress" >= 0 AND "progress" <= 100`)
 export class TaskEntity {
     @PrimaryGeneratedColumn("uuid")
     id_task: string
@@ -15,7 +16,13 @@ export class TaskEntity {
     title: string
 
     @Column({ type: "varchar", length: "MAX", nullable: true })
-    description: string
+    description: string | null
+
+    @Column({ type: "int" })
+    task_number: number
+
+    @Column({ type: "int", default: 0 })
+    progress: number
 
     @Column({ type: 'varchar', enum: TaskStatus, default: TaskStatus.PENDING })
     status: TaskStatus
