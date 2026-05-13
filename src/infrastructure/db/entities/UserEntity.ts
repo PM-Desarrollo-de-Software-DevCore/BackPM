@@ -46,6 +46,9 @@ export class UserEntity {
     @Column({ type: "varchar", length: 500, nullable: true })
     profileImageUrl: string | null
 
+    @Column({ type: "varchar", length: 500, nullable: true })
+    cvUrl: string | null
+
      // Relaciones
     @OneToMany(() => ProjectEntity, (project) => project.createdBy)
     projectsCreated: ProjectEntity[]

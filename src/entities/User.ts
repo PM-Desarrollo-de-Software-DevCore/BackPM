@@ -16,5 +16,6 @@ export interface User {
     skill?: string | null,
     area?: string | null,
     phoneNumber?: string | null,
-    profileImageUrl?: string | null
+    profileImageUrl?: string | null,
+    cvUrl?: string | null
 }
