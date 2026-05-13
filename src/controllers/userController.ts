@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import { findAllUsers, saveUser, updateUser, deleteUser, findUserById } from "../infrastructure/repositories/UserRepository"
-import { uploadProfileImage, deleteProfileImage } from "../infrastructure/cloudinary/CloudinaryClient"
+import { uploadProfileImage, deleteProfileImage, uploadCV, deleteCV, getCVSignedUrl } from "../infrastructure/cloudinary/CloudinaryClient"
 
 export const listUsersController = async (req: Request, res: Response) => {
   try {
@@ -94,6 +94,66 @@ export const deleteProfileImageController = async (req: Request, res: Response) 
       await deleteProfileImage(id)
     }
     await updateUser(id, { profileImageUrl: null })
+    const updated = await findUserById(id)
+    return res.status(200).json({ success: true, data: updated })
+  } catch (error: any) {
+    return res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+export const uploadCVController = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No se recibio ningun archivo" })
+    }
+
+    const id = String(req.params.id)
+    const user = await findUserById(id)
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Usuario no encontrado" })
+    }
+
+    const uploaded = await uploadCV(req.file.buffer, id)
+
+    await updateUser(id, { cvUrl: uploaded.secure_url })
+    const updated = await findUserById(id)
+    return res.status(200).json({ success: true, data: updated })
+  } catch (error: any) {
+    return res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+export const getCVController = async (req: Request, res: Response) => {
+  try {
+    const id = String(req.params.id)
+    const user = await findUserById(id)
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Usuario no encontrado" })
+    }
+
+    if (!user.cvUrl) {
+      return res.status(404).json({ success: false, message: "Usuario no tiene CV cargado" })
+    }
+
+    const { url, expiresAt } = getCVSignedUrl(id)
+    return res.status(200).json({ success: true, data: { url, expiresAt } })
+  } catch (error: any) {
+    return res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+export const deleteCVController = async (req: Request, res: Response) => {
+  try {
+    const id = String(req.params.id)
+    const user = await findUserById(id)
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Usuario no encontrado" })
+    }
+
+    if (user.cvUrl) {
+      await deleteCV(id)
+    }
+    await updateUser(id, { cvUrl: null })
     const updated = await findUserById(id)
     return res.status(200).json({ success: true, data: updated })
   } catch (error: any) {

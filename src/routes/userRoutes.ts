@@ -1,9 +1,10 @@
 import { Router } from "express"
-import { listUsersController, createUserController, updateUserController, deleteUserController, uploadProfileImageController, deleteProfileImageController } from "../controllers/userController"
+import { listUsersController, createUserController, updateUserController, deleteUserController, uploadProfileImageController, deleteProfileImageController, uploadCVController, getCVController, deleteCVController } from "../controllers/userController"
 import { getMyTasksController } from "../controllers/taskController"
 import { requireAuth } from "../middlewares/requireAuth"
 import { requireSelfOrAdmin } from "../middlewares/requireSelfOrAdmin"
 import { uploadProfileImage } from "../middlewares/uploadProfileImage"
+import { uploadPDF } from "../middlewares/uploadPDF"
 
 const router = Router()
 
@@ -116,5 +117,119 @@ router.post("/:id/profile-image", requireAuth, requireSelfOrAdmin(), uploadProfi
  *         description: Usuario no encontrado
  */
 router.delete("/:id/profile-image", requireAuth, requireSelfOrAdmin(), deleteProfileImageController)
+
+/**
+ * @swagger
+ * /users/{id}/cv:
+ *   post:
+ *     summary: Subir o reemplazar el CV del usuario
+ *     description: |
+ *       Sube un CV en PDF para el usuario indicado. Reemplaza el CV anterior si existia.
+ *       Solo PDF. Tamano maximo 10 MB. Acceso restringido al propio usuario o admins.
+ *       El archivo se guarda como recurso autenticado en Cloudinary; el URL crudo no es accesible publicamente.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [file]
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: CV subido correctamente
+ *       400:
+ *         description: Archivo invalido o no enviado
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Sin permiso (no es dueno ni admin)
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.post("/:id/cv", requireAuth, requireSelfOrAdmin(), uploadPDF.single("file"), uploadCVController)
+
+/**
+ * @swagger
+ * /users/{id}/cv:
+ *   get:
+ *     summary: Obtener URL firmado para descargar/ver el CV
+ *     description: |
+ *       Devuelve un URL firmado con expiracion (1 hora) para acceder al PDF.
+ *       Solo el dueno o un admin pueden solicitarlo. El URL es de uso unico temporal — si expira, pedir uno nuevo.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: URL firmado generado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       description: URL firmado de Cloudinary
+ *                     expiresAt:
+ *                       type: integer
+ *                       description: Unix timestamp de expiracion
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Sin permiso (no es dueno ni admin)
+ *       404:
+ *         description: Usuario no encontrado o sin CV cargado
+ */
+router.get("/:id/cv", requireAuth, requireSelfOrAdmin(), getCVController)
+
+/**
+ * @swagger
+ * /users/{id}/cv:
+ *   delete:
+ *     summary: Eliminar el CV del usuario
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: CV eliminado
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Sin permiso (no es dueno ni admin)
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.delete("/:id/cv", requireAuth, requireSelfOrAdmin(), deleteCVController)
 
 export default router
