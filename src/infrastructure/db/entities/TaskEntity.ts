@@ -30,9 +30,6 @@ export class TaskEntity {
     @Column({ type: 'varchar', enum: TaskPriority, default: TaskPriority.MEDIUM })
     priority: TaskPriority
 
-    @Column({ type: "datetime2" })
-    start_date: Date
-
     @Column({ type: "datetime2", nullable: true })
     end_date: Date | null
 
