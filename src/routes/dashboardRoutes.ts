@@ -245,7 +245,6 @@ router.get("/tasks-stats", requireAuth, getTasksStatsController)
  *                           status:
  *                             type: string
  *                             enum: [pending, in_progress, completed]
- *                           start_date: { type: string, format: date-time }
  *                           end_date:
  *                             type: string
  *                             format: date-time
