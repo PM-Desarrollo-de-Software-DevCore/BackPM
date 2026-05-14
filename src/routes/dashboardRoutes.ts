@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -265,5 +265,80 @@ router.get("/tasks-stats", requireAuth, getTasksStatsController)
  *         description: No autorizado
  */
 router.get("/user-tasks", requireAuth, getUserTasksController)
+
+/**
+ * @swagger
+ * /dashboard/weekly-progress:
+ *   get:
+ *     summary: Obtener progreso semanal (tareas completadas por dia)
+ *     description: |
+ *       Retorna el numero de tareas completadas en cada dia de la semana indicada.
+ *       Considera solo tareas con `status = completed` y un `completedAt` dentro del rango Lun-Dom.
+ *       Por defecto retorna la semana actual; usar `weekOffset` para navegar semanas anteriores.
+ *       Si se pasa `projectId`, restringe el calculo a ese proyecto (debe ser accesible para el usuario).
+ *       Si se omite, agrega todos los proyectos a los que el usuario tiene acceso (creador o miembro).
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: weekOffset
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           maximum: 0
+ *           default: 0
+ *         description: 0 = semana en curso, -1 = semana anterior, -2 = dos semanas atras, etc.
+ *       - in: query
+ *         name: projectId
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Filtrar el conteo a un proyecto especifico
+ *     responses:
+ *       200:
+ *         description: Progreso semanal calculado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     weekRange:
+ *                       type: object
+ *                       properties:
+ *                         start: { type: string, format: date-time }
+ *                         end: { type: string, format: date-time }
+ *                         weekOffset: { type: integer, example: 0 }
+ *                     totalCompleted:
+ *                       type: integer
+ *                       example: 12
+ *                     dailyCompletions:
+ *                       type: array
+ *                       description: Siempre 7 elementos en orden Lunes -> Domingo
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           date:
+ *                             type: string
+ *                             example: "2026-05-11"
+ *                           dayOfWeek:
+ *                             type: string
+ *                             enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+ *                           completed:
+ *                             type: integer
+ *                             example: 2
+ *       400:
+ *         description: Parametros invalidos
+ *       401:
+ *         description: No autorizado
+ */
+router.get("/weekly-progress", requireAuth, getWeeklyProgressController)
 
 export default router

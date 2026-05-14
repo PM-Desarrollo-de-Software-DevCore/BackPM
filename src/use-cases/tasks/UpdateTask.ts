@@ -68,7 +68,12 @@ export const updateTaskUseCase = async (
         }
     }
 
-    const updated = await updateTask(taskId, data)
+    const patch: Partial<typeof data> & { completedAt?: Date | null } = { ...data }
+    if (data.status !== undefined && data.status !== task.status) {
+        patch.completedAt = data.status === TaskStatus.COMPLETED ? new Date() : null
+    }
+
+    const updated = await updateTask(taskId, patch)
     if (!updated) {
         throw new Error("No se pudo actualizar la tarea")
     }
