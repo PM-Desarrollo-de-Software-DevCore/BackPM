@@ -100,6 +100,7 @@ export const createTaskUseCase = async (
         id_project,
         id_sprint: data.id_sprint,
         createdBy: userId,
-        assignedTo: data.assignedTo
+        assignedTo: data.assignedTo,
+        completedAt: data.status === TaskStatus.COMPLETED ? new Date() : null
     })
 }
