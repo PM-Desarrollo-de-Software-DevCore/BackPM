@@ -77,6 +77,23 @@ export const updateTask = async (id: string, data: Partial<Omit<Task, "id_task" 
     return await getTaskById(id)
 }
 
+export const getCompletedTasksInRange = async (
+    projectIds: string[],
+    rangeStart: Date,
+    rangeEnd: Date
+): Promise<Task[]> => {
+    if (projectIds.length === 0) return []
+
+    return await repo.createQueryBuilder("task")
+        .where("task.id_project IN (:...projectIds)", { projectIds })
+        .andWhere("task.status = :status", { status: TaskStatus.COMPLETED })
+        .andWhere("task.completedAt IS NOT NULL")
+        .andWhere("task.completedAt >= :rangeStart", { rangeStart })
+        .andWhere("task.completedAt < :rangeEnd", { rangeEnd })
+        .orderBy("task.completedAt", "ASC")
+        .getMany()
+}
+
 export const deleteTask = async (id: string): Promise<boolean> => {
     const result = await repo.delete({ id_task: id })
     return (result.affected ?? 0) > 0
