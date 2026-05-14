@@ -39,6 +39,9 @@ export class TaskEntity {
     @CreateDateColumn()
     createdAt: Date
 
+    @Column({ type: "datetime2", nullable: true })
+    completedAt: Date | null
+
     // Foreign Key: id_proyecto
     @ManyToOne(() => ProjectEntity, (project) => project.tasks, { onDelete: "CASCADE" })
     @JoinColumn({ name: "id_project" })

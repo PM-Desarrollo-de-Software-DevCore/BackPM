@@ -24,5 +24,6 @@ export interface Task {
     id_sprint: string | null,
     createdBy: string,
     assignedTo: string | null,
-    createdAt: Date
+    createdAt: Date,
+    completedAt: Date | null
 }
