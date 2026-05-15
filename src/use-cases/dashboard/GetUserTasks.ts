@@ -12,7 +12,6 @@ export interface UserTaskItem {
     progress: number
     priority: TaskPriority
     status: TaskStatus
-    start_date: Date
     end_date: Date | null
     project: { id_project: string; name: string } | null
     isOverdue: boolean
@@ -65,7 +64,6 @@ export const getUserTasksUseCase = async (
         progress: task.progress,
         priority: task.priority,
         status: task.status,
-        start_date: task.start_date,
         end_date: task.end_date,
         project: task.project,
         isOverdue: isOverdue(task, today)

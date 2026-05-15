@@ -27,11 +27,9 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
         const {
             title,
             description,
-            task_number,
             progress,
             priority,
             status,
-            start_date,
             end_date,
             id_sprint,
             assignedTo
@@ -40,20 +38,8 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
         if (!title) {
             return res.status(400).json({ success: false, message: "El título es obligatorio" })
         }
-        if (!description) {
-            return res.status(400).json({ success: false, message: "La descripción es obligatoria" })
-        }
-        if (task_number === undefined || task_number === null) {
-            return res.status(400).json({ success: false, message: "El número de tarea es obligatorio" })
-        }
         if (progress === undefined || progress === null) {
             return res.status(400).json({ success: false, message: "El progreso es obligatorio" })
-        }
-        if (!assignedTo) {
-            return res.status(400).json({ success: false, message: "El equipo designado (assignedTo) es obligatorio" })
-        }
-        if (!start_date) {
-            return res.status(400).json({ success: false, message: "La fecha de inicio es obligatoria" })
         }
         if (!end_date) {
             return res.status(400).json({ success: false, message: "La fecha de fin es obligatoria" })
@@ -62,15 +48,13 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
         const result = await createTaskUseCase(
             {
                 title,
-                description,
-                task_number: Number(task_number),
+                description: description ?? null,
                 progress: Number(progress),
                 priority: priority ?? TaskPriority.MEDIUM,
                 status: status ?? TaskStatus.PENDING,
-                start_date: new Date(start_date),
                 end_date: new Date(end_date),
                 id_sprint: id_sprint ?? null,
-                assignedTo
+                assignedTo: assignedTo ?? null
             },
             projectId,
             req.userId
@@ -133,9 +117,9 @@ export const updateTaskController = async (req: TaskRequest, res: Response) => {
         const { taskId } = req.params
         const body = req.body
 
+        const { task_number, start_date, ...rest } = body
         const result = await updateTaskUseCase(taskId, req.userId, {
-            ...body,
-            start_date: body.start_date ? new Date(body.start_date) : undefined,
+            ...rest,
             end_date: body.end_date !== undefined
                 ? (body.end_date ? new Date(body.end_date) : null)
                 : undefined

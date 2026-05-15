@@ -17,6 +17,15 @@ export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
     return await repo.find({ where: { id_project: projectId }, order: { createdAt: "DESC" } })
 }
 
+export const getNextTaskNumberForProject = async (projectId: string): Promise<number> => {
+    const result = await repo.createQueryBuilder("task")
+        .select("MAX(task.task_number)", "max")
+        .where("task.id_project = :projectId", { projectId })
+        .getRawOne<{ max: number | null }>()
+
+    return (result?.max ?? 0) + 1
+}
+
 export const getTasksBySprint = async (sprintId: string): Promise<Task[]> => {
     return await repo.find({ where: { id_sprint: sprintId }, order: { createdAt: "DESC" } })
 }
