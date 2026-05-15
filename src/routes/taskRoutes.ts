@@ -41,19 +41,15 @@ export const taskRouter = Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title, description, task_number, progress, assignedTo, start_date, end_date]
+ *             required: [title, progress, end_date]
  *             properties:
  *               title:
  *                 type: string
  *                 example: "Implementar login"
  *               description:
  *                 type: string
+ *                 nullable: true
  *                 example: "Construir el flujo de autenticación con JWT"
- *               task_number:
- *                 type: integer
- *                 minimum: 1
- *                 example: 1
- *                 description: Número identificador de la tarea
  *               progress:
  *                 type: integer
  *                 minimum: 0
@@ -63,10 +59,8 @@ export const taskRouter = Router()
  *               assignedTo:
  *                 type: string
  *                 format: uuid
- *                 description: Usuario / equipo designado (debe ser miembro del proyecto)
- *               start_date:
- *                 type: string
- *                 format: date-time
+ *                 nullable: true
+ *                 description: Usuario / equipo designado (opcional, debe ser miembro del proyecto si se indica)
  *               end_date:
  *                 type: string
  *                 format: date-time
@@ -187,9 +181,6 @@ taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
  *               description:
  *                 type: string
  *                 nullable: true
- *               task_number:
- *                 type: integer
- *                 minimum: 1
  *               progress:
  *                 type: integer
  *                 minimum: 0
@@ -200,9 +191,6 @@ taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
  *               status:
  *                 type: string
  *                 enum: [pending, in_progress, completed]
- *               start_date:
- *                 type: string
- *                 format: date-time
  *               end_date:
  *                 type: string
  *                 format: date-time
