@@ -9,7 +9,9 @@
     "migration:run": "ts-node node_modules/typeorm/cli migration:run -d src/infrastructure/db/DataSource.ts",
     "migration:revert": "ts-node node_modules/typeorm/cli migration:revert -d src/infrastructure/db/DataSource.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "seed:weekly-progress": "ts-node src/scripts/seedWeeklyProgress.ts",
+    "seed:weekly-progress:clean": "ts-node src/scripts/seedWeeklyProgress.ts --clean"
   },
   "keywords": [],
   "author": "",
