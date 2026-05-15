@@ -18,7 +18,6 @@ export interface Task {
     progress: number,
     priority: TaskPriority,
     status: TaskStatus,
-    start_date: Date,
     end_date: Date | null,
     id_project: string,
     id_sprint: string | null,

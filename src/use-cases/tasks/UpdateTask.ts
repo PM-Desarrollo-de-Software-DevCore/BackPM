@@ -10,11 +10,9 @@ export const updateTaskUseCase = async (
     data: {
         title?: string
         description?: string | null
-        task_number?: number
         progress?: number
         priority?: TaskPriority
         status?: TaskStatus
-        start_date?: Date
         end_date?: Date | null
         id_sprint?: string | null
         assignedTo?: string | null
@@ -31,18 +29,6 @@ export const updateTaskUseCase = async (
 
     if (!isPMorSM && !isAssigned) {
         throw new Error("No tienes permisos para actualizar esta tarea")
-    }
-
-    const newStart = data.start_date ?? task.start_date
-    const newEnd = data.end_date !== undefined ? data.end_date : task.end_date
-    if (newEnd && newStart > newEnd) {
-        throw new Error("La fecha de inicio debe ser anterior a la fecha de fin")
-    }
-
-    if (data.task_number !== undefined) {
-        if (!Number.isInteger(data.task_number) || data.task_number < 1) {
-            throw new Error("El número de tarea debe ser un entero mayor o igual a 1")
-        }
     }
 
     if (data.progress !== undefined) {
