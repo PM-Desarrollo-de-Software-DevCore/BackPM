@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn , OneToMany } from "typeorm"
-import { GlobalRole } from "../../../entities/User"
+import { GlobalRole, Specialty } from "../../../entities/User"
 import { ProjectEntity } from "./ProjectEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
@@ -49,6 +49,9 @@ export class UserEntity {
 
     @Column({ type: "varchar", length: 500, nullable: true })
     cvUrl: string | null
+
+    @Column({ type: "varchar", enum: Specialty, nullable: true })
+    specialty: Specialty | null
 
      // Relaciones
     @OneToMany(() => ProjectEntity, (project) => project.createdBy)
