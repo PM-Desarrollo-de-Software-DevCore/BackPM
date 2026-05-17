@@ -3,6 +3,16 @@ export enum GlobalRole {
     USER = "user"
 }
 
+export enum Specialty {
+    FRONTEND = "frontend",
+    BACKEND = "backend",
+    DATABASE = "database",
+    FULLSTACK = "fullstack",
+    DEVOPS = "devops",
+    MOBILE = "mobile",
+    QA = "qa"
+}
+
 export interface User {
     id: string,
     email: string,
@@ -17,5 +27,6 @@ export interface User {
     area?: string | null,
     phoneNumber?: string | null,
     profileImageUrl?: string | null,
-    cvUrl?: string | null
+    cvUrl?: string | null,
+    specialty?: Specialty | null
 }
