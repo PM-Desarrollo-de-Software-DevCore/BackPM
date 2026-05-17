@@ -4,6 +4,7 @@ import { ProjectEntity } from "./ProjectEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
 import { CommentEntity } from "./CommentEntity"
+import { UserTechnologyEntity } from "./UserTechnologyEntity"
 
 @Entity("users")
 export class UserEntity {
@@ -64,5 +65,8 @@ export class UserEntity {
 
     @OneToMany(() => CommentEntity, (comment) => comment.user)
     comments: CommentEntity[]
+
+    @OneToMany(() => UserTechnologyEntity, (tech) => tech.user)
+    technologies: UserTechnologyEntity[]
 }
 
