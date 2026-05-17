@@ -2,6 +2,17 @@ import { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import { findAllUsers, saveUser, updateUser, deleteUser, findUserById } from "../infrastructure/repositories/UserRepository"
 import { uploadProfileImage, deleteProfileImage, uploadCV, deleteCV, getCVSignedUrl } from "../infrastructure/cloudinary/CloudinaryClient"
+import { Specialty } from "../entities/User"
+
+const SPECIALTY_VALUES = Object.values(Specialty) as string[]
+
+const validateSpecialty = (value: unknown): { ok: true } | { ok: false; message: string } => {
+  if (value === undefined || value === null) return { ok: true }
+  if (typeof value !== "string" || !SPECIALTY_VALUES.includes(value)) {
+    return { ok: false, message: `specialty invalida. Valores permitidos: ${SPECIALTY_VALUES.join(", ")}` }
+  }
+  return { ok: true }
+}
 
 export const listUsersController = async (req: Request, res: Response) => {
   try {
@@ -17,6 +28,10 @@ export const createUserController = async (req: Request, res: Response) => {
     const data = req.body
     if (Array.isArray(data.area)) {
       data.area = data.area.join(", ")
+    }
+    const specialtyCheck = validateSpecialty(data.specialty)
+    if (!specialtyCheck.ok) {
+      return res.status(400).json({ success: false, message: specialtyCheck.message })
     }
     // If password provided, hash it so admin-created users store hashed passwords
     if (data.password) {
@@ -36,6 +51,10 @@ export const updateUserController = async (req: Request, res: Response) => {
     const data = req.body
     if (Array.isArray(data.area)) {
       data.area = data.area.join(", ")
+    }
+    const specialtyCheck = validateSpecialty(data.specialty)
+    if (!specialtyCheck.ok) {
+      return res.status(400).json({ success: false, message: specialtyCheck.message })
     }
     // If password being updated, hash it before saving
     if (data.password) {
