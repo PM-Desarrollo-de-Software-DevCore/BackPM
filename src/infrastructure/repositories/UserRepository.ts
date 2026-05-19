@@ -48,3 +48,30 @@ export const clearResetToken = async (userId: string): Promise<void> => {
         resetTokenExpiry: null
     })
 }
+
+export const incrementPoints = async (userId: string, delta: number): Promise<void> => {
+    await repo
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set({ points: () => `CASE WHEN points + ${delta} < 0 THEN 0 ELSE points + ${delta} END` })
+        .where("id = :id", { id: userId })
+        .execute()
+}
+
+export const getLeaderboard = async (limit: number): Promise<User[]> => {
+    return await repo.find({
+        order: { points: "DESC", name: "ASC" },
+        take: limit
+    })
+}
+
+export const getLeaderboardByProject = async (projectId: string, limit: number): Promise<User[]> => {
+    return await repo
+        .createQueryBuilder("u")
+        .innerJoin("member_project", "mp", `mp."id_user" = u."id"`)
+        .where(`mp."id_project" = :projectId`, { projectId })
+        .orderBy("u.points", "DESC")
+        .addOrderBy("u.name", "ASC")
+        .take(limit)
+        .getMany()
+}
