@@ -13,6 +13,7 @@ import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRo
 import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
 import { userTechnologyRouter, technologyRouter } from "./routes/userTechnologyRoutes"
 import dashboardRoutes from "./routes/dashboardRoutes"
+import { leaderboardRouter, projectLeaderboardRouter } from "./routes/leaderboardRoutes"
 
 const app = express()
 
@@ -33,6 +34,8 @@ app.use("/users", userRoutes)
 app.use("/users", userTechnologyRouter)
 app.use("/technologies", technologyRouter)
 app.use("/dashboard", dashboardRoutes)
+app.use("/leaderboard", leaderboardRouter)
+app.use("/projects", projectLeaderboardRouter)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 AppDataSource.initialize()
