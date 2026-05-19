@@ -1,8 +1,11 @@
 import { getTaskById, updateTask } from "../../infrastructure/repositories/TaskRepository"
 import { getUserRoleInProject, isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getSprintById } from "../../infrastructure/repositories/SprintRepository"
+import { incrementPoints } from "../../infrastructure/repositories/UserRepository"
 import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
+
+const POINTS_PER_TASK = 10
 
 export const updateTaskUseCase = async (
     taskId: string,
@@ -55,13 +58,30 @@ export const updateTaskUseCase = async (
     }
 
     const patch: Partial<typeof data> & { completedAt?: Date | null } = { ...data }
+    let pointsDelta = 0
+    let pointsRecipient: string | null = null
     if (data.status !== undefined && data.status !== task.status) {
         patch.completedAt = data.status === TaskStatus.COMPLETED ? new Date() : null
+
+        const finalAssignee = data.assignedTo !== undefined ? data.assignedTo : task.assignedTo
+        if (finalAssignee) {
+            if (data.status === TaskStatus.COMPLETED) {
+                pointsDelta = POINTS_PER_TASK
+                pointsRecipient = finalAssignee
+            } else if (task.status === TaskStatus.COMPLETED) {
+                pointsDelta = -POINTS_PER_TASK
+                pointsRecipient = finalAssignee
+            }
+        }
     }
 
     const updated = await updateTask(taskId, patch)
     if (!updated) {
         throw new Error("No se pudo actualizar la tarea")
+    }
+
+    if (pointsRecipient && pointsDelta !== 0) {
+        await incrementPoints(pointsRecipient, pointsDelta)
     }
 
     return updated
