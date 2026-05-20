@@ -1,6 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const { connectDB, sql } = require('./db');
+let recommendationRoutes = null;
+
+try {
+  const loadedRoutes = require('./dist/routes/recommendationRoutes');
+  recommendationRoutes = loadedRoutes.default || loadedRoutes;
+} catch (error) {
+  console.warn('No se pudo cargar el router de recomendaciones compilado:', error.message);
+}
 
 const app = express();
 
@@ -20,6 +28,10 @@ app.get('/proyectos', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+if (recommendationRoutes) {
+  app.use('/recommendations', recommendationRoutes);
+}
 
 async function start() {
   try {
