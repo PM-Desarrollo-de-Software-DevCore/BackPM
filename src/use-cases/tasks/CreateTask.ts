@@ -12,7 +12,7 @@ export const createTaskUseCase = async (
         progress: number
         priority: TaskPriority
         status: TaskStatus
-        end_date: Date
+        end_date: Date | null
         id_sprint: string | null
         assignedTo?: string | null
     },
@@ -24,9 +24,13 @@ export const createTaskUseCase = async (
         throw new Error("Proyecto no encontrado")
     }
 
-    const userRole = await getUserRoleInProject(userId, id_project)
+    let userRole = await getUserRoleInProject(userId, id_project)
     if (!userRole) {
-        throw new Error("No tienes permisos en este proyecto")
+        if (project.createdBy === userId) {
+            userRole = ProjectRole.PROJECT_MANAGER
+        } else {
+            throw new Error("No tienes permisos en este proyecto")
+        }
     }
 
     if (userRole !== ProjectRole.PROJECT_MANAGER && userRole !== ProjectRole.SCRUM_MASTER) {
@@ -42,10 +46,6 @@ export const createTaskUseCase = async (
     }
     if (!Number.isFinite(data.progress) || data.progress < 0 || data.progress > 100) {
         throw new Error("El progreso debe estar entre 0 y 100")
-    }
-
-    if (!data.end_date) {
-        throw new Error("La fecha de fin es obligatoria")
     }
 
     if (data.id_sprint) {

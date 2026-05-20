@@ -1,6 +1,7 @@
 import { getTaskById, updateTask } from "../../infrastructure/repositories/TaskRepository"
 import { getUserRoleInProject, isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getSprintById } from "../../infrastructure/repositories/SprintRepository"
+import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { incrementPoints } from "../../infrastructure/repositories/UserRepository"
 import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
@@ -26,7 +27,13 @@ export const updateTaskUseCase = async (
         throw new Error("Tarea no encontrada")
     }
 
-    const userRole = await getUserRoleInProject(userId, task.id_project)
+    let userRole = await getUserRoleInProject(userId, task.id_project)
+    if (!userRole) {
+        const project = await getProjectById(task.id_project)
+        if (project && project.createdBy === userId) {
+            userRole = ProjectRole.PROJECT_MANAGER
+        }
+    }
     const isPMorSM = userRole === ProjectRole.PROJECT_MANAGER || userRole === ProjectRole.SCRUM_MASTER
     const isAssigned = task.assignedTo === userId
 

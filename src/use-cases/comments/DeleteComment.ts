@@ -1,5 +1,6 @@
 import { getCommentById, deleteComment } from "../../infrastructure/repositories/CommentRepository"
 import { getTaskById } from "../../infrastructure/repositories/TaskRepository"
+import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { ProjectRole } from "../../entities/MemberProject"
 
@@ -17,7 +18,13 @@ export const deleteCommentUseCase = async (commentId: string, userId: string) =>
         if (!task) {
             throw new Error("Tarea del comentario no encontrada")
         }
-        const role = await getUserRoleInProject(userId, task.id_project)
+        let role = await getUserRoleInProject(userId, task.id_project)
+        if (!role) {
+            const project = await getProjectById(task.id_project)
+            if (project && project.createdBy === userId) {
+                role = ProjectRole.PROJECT_MANAGER
+            }
+        }
         isProjectManager = role === ProjectRole.PROJECT_MANAGER
     }
 
