@@ -19,10 +19,15 @@ export const createSprintUseCase = async (
     }
 
     // Validar permisos: solo project_manager y scrum_master pueden crear sprints
-    const userRole = await getUserRoleInProject(userId, id_project)
+    let userRole = await getUserRoleInProject(userId, id_project)
 
+    // Si no está en member_project pero es el creador del proyecto, permitirlo
     if (!userRole) {
-        throw new Error("No tienes permisos en este proyecto")
+        if (project.createdBy === userId) {
+            userRole = ProjectRole.PROJECT_MANAGER
+        } else {
+            throw new Error("No tienes permisos en este proyecto")
+        }
     }
 
     if (userRole !== ProjectRole.PROJECT_MANAGER && userRole !== ProjectRole.SCRUM_MASTER) {
