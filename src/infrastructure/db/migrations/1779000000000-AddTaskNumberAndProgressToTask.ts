@@ -6,12 +6,12 @@ export class AddTaskNumberAndProgressToTask1779000000000 implements MigrationInt
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             ALTER TABLE "task"
-            ADD "task_number" int NOT NULL CONSTRAINT "DF_task_task_number" DEFAULT 0
+            ADD "task_number" int NOT NULL DEFAULT 0
         `)
 
         await queryRunner.query(`
             ALTER TABLE "task"
-            ADD "progress" int NOT NULL CONSTRAINT "DF_task_progress" DEFAULT 0
+            ADD "progress" int NOT NULL DEFAULT 0
         `)
 
         await queryRunner.query(`
@@ -22,29 +22,40 @@ export class AddTaskNumberAndProgressToTask1779000000000 implements MigrationInt
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
-            ALTER TABLE "task"
-            DROP CONSTRAINT "CHK_task_progress_range"
-        `)
+        // Verificar y eliminar constraint de progreso
+        try {
+            await queryRunner.query(`
+                ALTER TABLE "task"
+                DROP CONSTRAINT "CHK_task_progress_range"
+            `)
+        } catch (e) {}
 
-        await queryRunner.query(`
-            ALTER TABLE "task"
-            DROP CONSTRAINT "DF_task_progress"
-        `)
+        try {
+            await queryRunner.query(`
+                ALTER TABLE "task"
+                DROP CONSTRAINT "DF_task_progress"
+            `)
+        } catch (e) {}
 
-        await queryRunner.query(`
-            ALTER TABLE "task"
-            DROP COLUMN "progress"
-        `)
+        try {
+            await queryRunner.query(`
+                ALTER TABLE "task"
+                DROP COLUMN "progress"
+            `)
+        } catch (e) {}
 
-        await queryRunner.query(`
-            ALTER TABLE "task"
-            DROP CONSTRAINT "DF_task_task_number"
-        `)
+        try {
+            await queryRunner.query(`
+                ALTER TABLE "task"
+                DROP CONSTRAINT "DF_task_task_number"
+            `)
+        } catch (e) {}
 
-        await queryRunner.query(`
-            ALTER TABLE "task"
-            DROP COLUMN "task_number"
-        `)
+        try {
+            await queryRunner.query(`
+                ALTER TABLE "task"
+                DROP COLUMN "task_number"
+            `)
+        } catch (e) {}
     }
 }
