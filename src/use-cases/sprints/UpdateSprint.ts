@@ -1,5 +1,6 @@
 import { getSprintById, updateSprint } from "../../infrastructure/repositories/SprintRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
+import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { SprintStatus } from "../../entities/Sprint"
 import { ProjectRole } from "../../entities/MemberProject"
 
@@ -19,7 +20,13 @@ export const updateSprintUseCase = async (
     }
 
     // Validar permisos
-    const userRole = await getUserRoleInProject(userId, sprint.id_project)
+    let userRole = await getUserRoleInProject(userId, sprint.id_project)
+    if (!userRole) {
+        const project = await getProjectById(sprint.id_project)
+        if (project && project.createdBy === userId) {
+            userRole = ProjectRole.PROJECT_MANAGER
+        }
+    }
     if (!userRole || (userRole !== ProjectRole.PROJECT_MANAGER && userRole !== ProjectRole.SCRUM_MASTER)) {
         throw new Error("Solo project_manager y scrum_master pueden actualizar sprints")
     }

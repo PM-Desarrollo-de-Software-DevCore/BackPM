@@ -41,9 +41,6 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
         if (progress === undefined || progress === null) {
             return res.status(400).json({ success: false, message: "El progreso es obligatorio" })
         }
-        if (!end_date) {
-            return res.status(400).json({ success: false, message: "La fecha de fin es obligatoria" })
-        }
 
         const result = await createTaskUseCase(
             {
@@ -52,7 +49,7 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
                 progress: Number(progress),
                 priority: priority ?? TaskPriority.MEDIUM,
                 status: status ?? TaskStatus.PENDING,
-                end_date: new Date(end_date),
+                end_date: end_date ? new Date(end_date) : null,
                 id_sprint: id_sprint ?? null,
                 assignedTo: assignedTo ?? null
             },

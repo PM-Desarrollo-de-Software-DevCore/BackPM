@@ -1,5 +1,6 @@
 import { getSprintById, deleteSprint } from "../../infrastructure/repositories/SprintRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
+import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { ProjectRole } from "../../entities/MemberProject"
 
 export const deleteSprintUseCase = async (sprintId: string, userId: string) => {
@@ -9,7 +10,13 @@ export const deleteSprintUseCase = async (sprintId: string, userId: string) => {
     }
 
     // Validar permisos: solo project_manager puede eliminar sprints
-    const userRole = await getUserRoleInProject(userId, sprint.id_project)
+    let userRole = await getUserRoleInProject(userId, sprint.id_project)
+    if (!userRole) {
+        const project = await getProjectById(sprint.id_project)
+        if (project && project.createdBy === userId) {
+            userRole = ProjectRole.PROJECT_MANAGER
+        }
+    }
     if (userRole !== ProjectRole.PROJECT_MANAGER) {
         throw new Error("Solo project_manager puede eliminar sprints")
     }
