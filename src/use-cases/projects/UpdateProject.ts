@@ -1,6 +1,7 @@
 import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { ProjectPriority, ProjectStatus } from "../../entities/Project"
+import { notifyProjectCompleted } from "../../infrastructure/services/notificationService"
 
 export const updateProjectUseCase = async (
     projectId: string,
@@ -38,6 +39,10 @@ export const updateProjectUseCase = async (
 
     if (!updated) {
         throw new Error("No se pudo actualizar el proyecto")
+    }
+
+    if (project.status !== ProjectStatus.COMPLETED && updated.status === ProjectStatus.COMPLETED) {
+        await notifyProjectCompleted(projectId, userId)
     }
 
     return updated

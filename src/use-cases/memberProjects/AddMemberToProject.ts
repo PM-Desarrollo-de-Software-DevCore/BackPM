@@ -3,6 +3,7 @@ import { addMemberToProject, isMemberProject, countProjectManagers } from "../..
 import { findUserById } from "../../infrastructure/repositories/UserRepository"
 import { GlobalRole } from "../../entities/User"
 import { ProjectRole } from "../../entities/MemberProject"
+import { notifyProjectMemberAdded } from "../../infrastructure/services/notificationService"
 
 export const addMemberToProjectUseCase = async (
     projectId: string,
@@ -42,5 +43,7 @@ export const addMemberToProjectUseCase = async (
         }
     }
 
-    return await addMemberToProject(userIdToAdd, projectId, roleToAssign)
+    const member = await addMemberToProject(userIdToAdd, projectId, roleToAssign)
+    await notifyProjectMemberAdded(projectId, userIdToAdd, adminUserId)
+    return member
 }

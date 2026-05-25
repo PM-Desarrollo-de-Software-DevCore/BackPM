@@ -4,6 +4,7 @@ import { getProjectById } from "../../infrastructure/repositories/ProjectReposit
 import { getSprintById } from "../../infrastructure/repositories/SprintRepository"
 import { Task, TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
+import { notifyTaskAssigned } from "../../infrastructure/services/notificationService"
 
 export const createTaskUseCase = async (
     data: {
@@ -68,7 +69,7 @@ export const createTaskUseCase = async (
 
     const task_number = await getNextTaskNumberForProject(id_project)
 
-    return await createTask({
+    const task = await createTask({
         title: data.title,
         description: data.description ?? null,
         task_number,
@@ -82,4 +83,8 @@ export const createTaskUseCase = async (
         assignedTo,
         completedAt: data.status === TaskStatus.COMPLETED ? new Date() : null
     })
+
+    await notifyTaskAssigned(task.id_task, task.assignedTo, userId)
+
+    return task
 }
