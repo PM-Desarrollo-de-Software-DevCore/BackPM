@@ -5,6 +5,7 @@ import { getProjectById } from "../../infrastructure/repositories/ProjectReposit
 import { incrementPoints } from "../../infrastructure/repositories/UserRepository"
 import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
+import { notifyTaskAssigned } from "../../infrastructure/services/notificationService"
 
 const POINTS_PER_TASK = 10
 
@@ -85,6 +86,12 @@ export const updateTaskUseCase = async (
     const updated = await updateTask(taskId, patch)
     if (!updated) {
         throw new Error("No se pudo actualizar la tarea")
+    }
+
+    const finalAssignee = updated.assignedTo
+    const assigneeChanged = data.assignedTo !== undefined && data.assignedTo !== task.assignedTo
+    if (finalAssignee && assigneeChanged) {
+        await notifyTaskAssigned(taskId, finalAssignee, userId)
     }
 
     if (pointsRecipient && pointsDelta !== 0) {

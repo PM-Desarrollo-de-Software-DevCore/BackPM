@@ -3,6 +3,7 @@ import { getTaskById } from "../../infrastructure/repositories/TaskRepository"
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { Comment } from "../../entities/Comment"
+import { notifyTaskCommented } from "../../infrastructure/services/notificationService"
 
 export const createCommentUseCase = async (
     taskId: string,
@@ -28,9 +29,13 @@ export const createCommentUseCase = async (
         throw new Error("No tienes acceso a esta tarea")
     }
 
-    return await createComment({
+    const created = await createComment({
         comment: comment.trim(),
         id_user: userId,
         id_task: taskId
     })
+
+    await notifyTaskCommented(taskId, userId)
+
+    return created
 }

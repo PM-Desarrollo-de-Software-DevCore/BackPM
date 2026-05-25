@@ -3,6 +3,10 @@ import bcrypt from "bcrypt"
 import { findAllUsers, saveUser, updateUser, deleteUser, findUserById } from "../infrastructure/repositories/UserRepository"
 import { uploadProfileImage, deleteProfileImage, uploadCV, deleteCV, getCVSignedUrl } from "../infrastructure/cloudinary/CloudinaryClient"
 import { Specialty } from "../entities/User"
+import { AuthenticatedRequest } from "../middlewares/requireAuth"
+import { getCurrentUser } from "../use-cases/auth/GetCurrentUser"
+import { notifyAdminUserChange } from "../infrastructure/services/notificationService"
+import { NotificationCategory } from "../entities/Notification"
 
 const SPECIALTY_VALUES = Object.values(Specialty) as string[]
 
@@ -23,7 +27,7 @@ export const listUsersController = async (req: Request, res: Response) => {
   }
 }
 
-export const createUserController = async (req: Request, res: Response) => {
+export const createUserController = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = req.body
     if (Array.isArray(data.area)) {
@@ -39,13 +43,25 @@ export const createUserController = async (req: Request, res: Response) => {
       data.password = hashed
     }
     const created = await saveUser(data)
+    if (req.userId) {
+      const actor = await getCurrentUser(req.userId)
+      if (actor.role === "admin") {
+        await notifyAdminUserChange({
+          actorUserId: req.userId,
+          category: NotificationCategory.ADMIN_USER_CREATED,
+          title: "Usuario creado",
+          actionVerb: "creó el usuario",
+          targetName: `${created.name} ${created.lastname}`,
+        })
+      }
+    }
     res.status(201).json({ success: true, data: created })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
   }
 }
 
-export const updateUserController = async (req: Request, res: Response) => {
+export const updateUserController = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = String(req.params.id)
     const data = req.body
@@ -61,18 +77,44 @@ export const updateUserController = async (req: Request, res: Response) => {
       const hashed = await bcrypt.hash(String(data.password), 10)
       data.password = hashed
     }
+    const previous = await findUserById(id)
     await updateUser(id, data)
     const updated = await findUserById(id)
+    if (req.userId) {
+      const actor = await getCurrentUser(req.userId)
+      if (actor.role === "admin" && previous && updated) {
+        await notifyAdminUserChange({
+          actorUserId: req.userId,
+          category: NotificationCategory.ADMIN_USER_UPDATED,
+          title: "Usuario actualizado",
+          actionVerb: "actualizó el usuario",
+          targetName: `${updated.name} ${updated.lastname}`,
+        })
+      }
+    }
     res.status(200).json({ success: true, data: updated })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
   }
 }
 
-export const deleteUserController = async (req: Request, res: Response) => {
+export const deleteUserController = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = String(req.params.id)
+    const previous = await findUserById(id)
     await deleteUser(id)
+    if (req.userId && previous) {
+      const actor = await getCurrentUser(req.userId)
+      if (actor.role === "admin") {
+        await notifyAdminUserChange({
+          actorUserId: req.userId,
+          category: NotificationCategory.ADMIN_USER_DELETED,
+          title: "Usuario eliminado",
+          actionVerb: "eliminó el usuario",
+          targetName: `${previous.name} ${previous.lastname}`,
+        })
+      }
+    }
     res.status(200).json({ success: true })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })

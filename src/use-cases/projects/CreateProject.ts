@@ -2,6 +2,7 @@ import { createProject } from "../../infrastructure/repositories/ProjectReposito
 import { findUserById } from "../../infrastructure/repositories/UserRepository"
 import { Project, ProjectPriority, ProjectStatus } from "../../entities/Project"
 import { GlobalRole } from "../../entities/User"
+import { notifyProjectCreated } from "../../infrastructure/services/notificationService"
 
 export const createProjectUseCase = async (
     name: string,
@@ -26,7 +27,7 @@ export const createProjectUseCase = async (
         throw new Error("La fecha de inicio debe ser anterior a la fecha de fin")
     }
 
-    return await createProject({
+    const project = await createProject({
         name,
         description,
         start_date,
@@ -35,4 +36,8 @@ export const createProjectUseCase = async (
         status,
         createdBy: userId
     })
+
+    await notifyProjectCreated(project.id_project, userId)
+
+    return project
 }
