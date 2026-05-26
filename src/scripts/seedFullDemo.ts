@@ -11,7 +11,6 @@ import { TaskStatus, TaskPriority } from "../entities/Task"
 import { ProjectRole } from "../entities/MemberProject"
 
 const DEMO_PREFIX = "[DEMO]"
-const POINTS_PER_TASK = 10
 
 type ProjectSpec = {
     name: string
@@ -183,20 +182,6 @@ const replaceTasks = async (
     return { inserted: tasks.length, completed }
 }
 
-const recomputePoints = async (): Promise<void> => {
-    await AppDataSource.query(`
-        UPDATE u
-        SET u."points" = ISNULL(t.cnt, 0) * ${POINTS_PER_TASK}
-        FROM "users" u
-        LEFT JOIN (
-            SELECT "assignedTo", COUNT(*) AS cnt
-            FROM "task"
-            WHERE "status" = 'completed' AND "assignedTo" IS NOT NULL
-            GROUP BY "assignedTo"
-        ) t ON t."assignedTo" = u."id"
-    `)
-}
-
 const seed = async (): Promise<void> => {
     const users = await loadExistingUsers()
     console.log(`[seed] Usando ${users.length} usuario(s) existentes:`)
@@ -218,11 +203,8 @@ const seed = async (): Promise<void> => {
         console.log(`[seed] ${project.name}: sprint ${sprint.status}, ${inserted} tareas (${completed} completed)`)
     }
 
-    await recomputePoints()
-
     console.log(`[seed] Total proyectos: ${PROJECT_SPECS.length}`)
     console.log(`[seed] Total tareas insertadas: ${totalTasks} (${totalCompleted} completed)`)
-    console.log(`[seed] Puntos recalculados para todos los usuarios.`)
 }
 
 const clean = async (): Promise<void> => {
@@ -248,9 +230,6 @@ const clean = async (): Promise<void> => {
         await projectRepo.delete({ id_project: project.id_project })
         console.log(`[clean] Proyecto demo eliminado: ${project.name} (${project.id_project})`)
     }
-
-    await recomputePoints()
-    console.log(`[clean] Puntos recalculados para todos los usuarios.`)
 }
 
 const preview = async (): Promise<void> => {
