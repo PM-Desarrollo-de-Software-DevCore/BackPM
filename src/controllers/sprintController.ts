@@ -6,6 +6,7 @@ import { getSprintsUseCase } from "../use-cases/sprints/GetSprints"
 import { getSprintByIdUseCase } from "../use-cases/sprints/GetSprintById"
 import { updateSprintUseCase } from "../use-cases/sprints/UpdateSprint"
 import { deleteSprintUseCase } from "../use-cases/sprints/DeleteSprint"
+import { getSprintStoryPointsUseCase } from "../use-cases/sprints/GetSprintStoryPoints"
 
 type ProjectParams = { projectId: string }
 type SprintParams = { sprintId: string }
@@ -96,5 +97,20 @@ export const deleteSprintController = async (req: SprintRequest, res: Response) 
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getSprintStoryPointsController = async (req: SprintRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const { sprintId } = req.params
+
+        const result = await getSprintStoryPointsUseCase(sprintId, req.userId)
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
     }
 }

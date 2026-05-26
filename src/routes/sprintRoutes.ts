@@ -5,7 +5,8 @@ import {
     getSprintsController,
     getSprintByIdController,
     updateSprintController,
-    deleteSprintController
+    deleteSprintController,
+    getSprintStoryPointsController
 } from "../controllers/sprintController"
 
 const router = Router()
@@ -94,6 +95,29 @@ router.get("/:projectId/sprints", requireAuth, getSprintsController)
  *         description: Sprint encontrado
  */
 router.get("/:sprintId", requireAuth, getSprintByIdController)
+
+/**
+ * @swagger
+ * /sprints/{sprintId}/story-points:
+ *   get:
+ *     summary: Resumen de story points del sprint
+ *     tags: [Sprints]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sprintId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Puntos comprometidos, completados, restantes y conteo de tareas estimadas
+ *       404:
+ *         description: Sprint no encontrado o sin acceso
+ */
+router.get("/:sprintId/story-points", requireAuth, getSprintStoryPointsController)
 
 /**
  * @swagger

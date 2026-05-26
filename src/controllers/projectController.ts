@@ -5,6 +5,8 @@ import { getMyProjectsUseCase } from "../use-cases/projects/GetMyProjects"
 import { getProjectByIdUseCase } from "../use-cases/projects/GetProjectById"
 import { updateProjectUseCase } from "../use-cases/projects/UpdateProject"
 import { deleteProjectUseCase } from "../use-cases/projects/DeleteProject"
+import { getProjectVelocityUseCase } from "../use-cases/projects/GetProjectVelocity"
+import { getProjectStoryPointsUseCase } from "../use-cases/projects/GetProjectStoryPoints"
 import { ProjectPriority, ProjectStatus } from "../entities/Project"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
@@ -104,5 +106,43 @@ export const deleteProjectController = async (req: AuthenticatedRequest, res: Re
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getProjectVelocityController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const result = await getProjectVelocityUseCase(projectId, req.userId)
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
+    }
+}
+
+export const getProjectStoryPointsController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const result = await getProjectStoryPointsUseCase(projectId, req.userId)
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
     }
 }

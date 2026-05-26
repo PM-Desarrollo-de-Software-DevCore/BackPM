@@ -133,6 +133,29 @@ export const updateTaskController = async (req: TaskRequest, res: Response) => {
     }
 }
 
+export const updateTaskStoryPointsController = async (req: TaskRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const { taskId } = req.params
+        const { story_points } = req.body
+
+        if (story_points === undefined) {
+            return res.status(400).json({ success: false, message: "story_points es obligatorio" })
+        }
+
+        const result = await updateTaskUseCase(taskId, req.userId, {
+            story_points: story_points === null ? null : Number(story_points)
+        })
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
 export const deleteTaskController = async (req: TaskRequest, res: Response) => {
     try {
         if (!req.userId) {
