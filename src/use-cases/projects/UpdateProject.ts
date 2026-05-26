@@ -1,6 +1,6 @@
 import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
-import { ProjectPriority, ProjectStatus } from "../../entities/Project"
+import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../../entities/Project"
 import { notifyProjectCompleted } from "../../infrastructure/services/notificationService"
 
 export const updateProjectUseCase = async (
@@ -9,6 +9,13 @@ export const updateProjectUseCase = async (
     data: {
         name?: string
         description?: string | null
+        client?: string
+        project_type?: string
+        methodology?: ProjectMethodology
+        estimated_sprints?: number | null
+        budget?: number | null
+        monthly_cost?: number | null
+        billing_model?: ProjectBillingModel | null
         start_date?: Date
         end_date?: Date | null
         priority?: ProjectPriority

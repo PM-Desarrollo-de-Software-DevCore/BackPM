@@ -3,7 +3,7 @@ import { UserEntity } from "./UserEntity"
 import { SprintEntity } from "./SprintEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
 import { TaskEntity } from "./TaskEntity"
-import { ProjectStatus, ProjectPriority } from "../../../entities/Project"
+import { ProjectStatus, ProjectPriority, ProjectMethodology, ProjectBillingModel } from "../../../entities/Project"
 
 @Entity("projects")
 export class ProjectEntity {
@@ -15,6 +15,27 @@ export class ProjectEntity {
 
     @Column({ type: "varchar", length: "MAX", nullable: true })
     description: string | null
+
+    @Column({ type: "nvarchar", length: 255 })
+    client: string
+
+    @Column({ type: "nvarchar", length: 255 })
+    project_type: string
+
+    @Column({ type: "varchar", length: 20, enum: ProjectMethodology })
+    methodology: ProjectMethodology
+
+    @Column({ type: "int", nullable: true })
+    estimated_sprints: number | null
+
+    @Column({ type: "float", nullable: true })
+    budget: number | null
+
+    @Column({ type: "float", nullable: true })
+    monthly_cost: number | null
+
+    @Column({ type: "varchar", length: 30, enum: ProjectBillingModel, nullable: true })
+    billing_model: ProjectBillingModel | null
 
     @Column({ type: "datetime2" })
     start_date: Date
