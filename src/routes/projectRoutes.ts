@@ -25,13 +25,39 @@ const router = Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, start_date, end_date, status]
+ *             required: [name, client, project_type, methodology, start_date, end_date, status]
  *             properties:
  *               name:
  *                 type: string
  *                 example: "Backlog App"
  *               description:
  *                 type: string
+ *                 nullable: true
+ *               client:
+ *                 type: string
+ *                 example: "Acme Corp"
+ *               project_type:
+ *                 type: string
+ *                 example: "Web app"
+ *               methodology:
+ *                 type: string
+ *                 enum: [scrum, kanban]
+ *                 example: "scrum"
+ *               estimated_sprints:
+ *                 type: integer
+ *                 example: 6
+ *                 nullable: true
+ *               budget:
+ *                 type: number
+ *                 example: 25000
+ *                 nullable: true
+ *               monthly_cost:
+ *                 type: number
+ *                 example: 3200
+ *                 nullable: true
+ *               billing_model:
+ *                 type: string
+ *                 enum: [fixed_price, time_and_materials, retainer]
  *                 nullable: true
  *               start_date:
  *                 type: string
@@ -123,6 +149,26 @@ router.get("/:projectId", requireAuth, getProjectByIdController)
  *                 type: string
  *               description:
  *                 type: string
+ *                 nullable: true
+ *               client:
+ *                 type: string
+ *               project_type:
+ *                 type: string
+ *               methodology:
+ *                 type: string
+ *                 enum: [scrum, kanban]
+ *               estimated_sprints:
+ *                 type: integer
+ *                 nullable: true
+ *               budget:
+ *                 type: number
+ *                 nullable: true
+ *               monthly_cost:
+ *                 type: number
+ *                 nullable: true
+ *               billing_model:
+ *                 type: string
+ *                 enum: [fixed_price, time_and_materials, retainer]
  *                 nullable: true
  *               start_date:
  *                 type: string

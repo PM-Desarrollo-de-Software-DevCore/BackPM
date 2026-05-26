@@ -13,7 +13,8 @@
     "seed:weekly-progress": "ts-node src/scripts/seedWeeklyProgress.ts",
     "seed:weekly-progress:clean": "ts-node src/scripts/seedWeeklyProgress.ts --clean",
     "seed:demo": "ts-node src/scripts/seedFullDemo.ts",
-    "seed:demo:clean": "ts-node src/scripts/seedFullDemo.ts --clean"
+    "seed:demo:clean": "ts-node src/scripts/seedFullDemo.ts --clean",
+    "seed:projects": "ts-node src/scripts/seedProjects.ts"
   },
   "keywords": [],
   "author": "",
