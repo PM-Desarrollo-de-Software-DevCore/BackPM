@@ -56,6 +56,12 @@ export const taskRouter = Router()
  *                 maximum: 100
  *                 example: 0
  *                 description: Porcentaje de avance (0-100)
+ *               story_points:
+ *                 type: integer
+ *                 minimum: 0
+ *                 nullable: true
+ *                 example: 5
+ *                 description: Estimación de esfuerzo (entero >= 0; null si la tarea no está estimada)
  *               assignedTo:
  *                 type: string
  *                 format: uuid
@@ -185,6 +191,11 @@ taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
  *                 type: integer
  *                 minimum: 0
  *                 maximum: 100
+ *               story_points:
+ *                 type: integer
+ *                 minimum: 0
+ *                 nullable: true
+ *                 description: Estimación de esfuerzo (entero >= 0; null para des-estimar)
  *               priority:
  *                 type: string
  *                 enum: [low, medium, high]

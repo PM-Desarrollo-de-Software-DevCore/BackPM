@@ -28,6 +28,7 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
             title,
             description,
             progress,
+            story_points,
             priority,
             status,
             end_date,
@@ -47,6 +48,7 @@ export const createTaskController = async (req: ProjectRequest, res: Response) =
                 title,
                 description: description ?? null,
                 progress: Number(progress),
+                story_points: story_points === undefined || story_points === null ? null : Number(story_points),
                 priority: priority ?? TaskPriority.MEDIUM,
                 status: status ?? TaskStatus.PENDING,
                 end_date: end_date ? new Date(end_date) : null,
@@ -114,9 +116,12 @@ export const updateTaskController = async (req: TaskRequest, res: Response) => {
         const { taskId } = req.params
         const body = req.body
 
-        const { task_number, start_date, ...rest } = body
+        const { task_number, start_date, story_points, ...rest } = body
         const result = await updateTaskUseCase(taskId, req.userId, {
             ...rest,
+            story_points: story_points !== undefined
+                ? (story_points === null ? null : Number(story_points))
+                : undefined,
             end_date: body.end_date !== undefined
                 ? (body.end_date ? new Date(body.end_date) : null)
                 : undefined

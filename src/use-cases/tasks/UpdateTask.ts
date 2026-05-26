@@ -15,6 +15,7 @@ export const updateTaskUseCase = async (
         title?: string
         description?: string | null
         progress?: number
+        story_points?: number | null
         priority?: TaskPriority
         status?: TaskStatus
         end_date?: Date | null
@@ -44,6 +45,12 @@ export const updateTaskUseCase = async (
     if (data.progress !== undefined) {
         if (!Number.isFinite(data.progress) || data.progress < 0 || data.progress > 100) {
             throw new Error("El progreso debe estar entre 0 y 100")
+        }
+    }
+
+    if (data.story_points !== undefined && data.story_points !== null) {
+        if (!Number.isInteger(data.story_points) || data.story_points < 0) {
+            throw new Error("Los story points deben ser un entero mayor o igual a 0")
         }
     }
 
