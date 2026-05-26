@@ -166,6 +166,7 @@ const replaceTasks = async (
                 description: `Tarea demo en estado ${status} con prioridad ${priority}.`,
                 task_number: startingNumber + i,
                 progress: isCompleted ? 100 : status === TaskStatus.IN_PROGRESS ? 50 : 0,
+                story_points: [1, 2, 3, 5, 8][i % 5]!,
                 status,
                 priority,
                 end_date: isCompleted ? null : addDays(today, 5 + i * 2),
