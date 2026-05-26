@@ -5,7 +5,7 @@ import { UserEntity } from "../infrastructure/db/entities/UserEntity"
 import { ProjectEntity } from "../infrastructure/db/entities/ProjectEntity"
 import { TaskEntity } from "../infrastructure/db/entities/TaskEntity"
 import { GlobalRole } from "../entities/User"
-import { ProjectStatus, ProjectPriority } from "../entities/Project"
+import { ProjectStatus, ProjectPriority, ProjectMethodology, ProjectBillingModel } from "../entities/Project"
 import { TaskStatus, TaskPriority } from "../entities/Task"
 
 const SEED_EMAIL = "scrum.test@devcore.com"
@@ -83,6 +83,13 @@ const createDummyProject = async (userId: string): Promise<ProjectEntity> => {
     const created = projectRepo.create({
         name: DUMMY_PROJECT_NAME,
         description: "Proyecto generado por el seed seedWeeklyProgress para alimentar el dashboard con datos dummy.",
+        client: "Scrum Test Client",
+        project_type: "Dashboard support",
+        methodology: ProjectMethodology.SCRUM,
+        estimated_sprints: 4,
+        budget: 12000,
+        monthly_cost: null,
+        billing_model: ProjectBillingModel.FIXED_PRICE,
         start_date: startDate,
         end_date: endDate,
         priority: ProjectPriority.MEDIUM,

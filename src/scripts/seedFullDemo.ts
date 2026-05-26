@@ -5,7 +5,7 @@ import { ProjectEntity } from "../infrastructure/db/entities/ProjectEntity"
 import { SprintEntity } from "../infrastructure/db/entities/SprintEntity"
 import { TaskEntity } from "../infrastructure/db/entities/TaskEntity"
 import { MemberProjectEntity } from "../infrastructure/db/entities/MemberProjectEntity"
-import { ProjectStatus, ProjectPriority } from "../entities/Project"
+import { ProjectStatus, ProjectPriority, ProjectMethodology, ProjectBillingModel } from "../entities/Project"
 import { SprintStatus } from "../entities/Sprint"
 import { TaskStatus, TaskPriority } from "../entities/Task"
 import { ProjectRole } from "../entities/MemberProject"
@@ -15,6 +15,13 @@ const POINTS_PER_TASK = 10
 
 type ProjectSpec = {
     name: string
+    client: string
+    projectType: string
+    methodology: ProjectMethodology
+    estimatedSprints: number | null
+    budget: number | null
+    monthlyCost: number | null
+    billingModel: ProjectBillingModel | null
     status: ProjectStatus
     priority: ProjectPriority
     startOffsetDays: number
@@ -22,11 +29,11 @@ type ProjectSpec = {
 }
 
 const PROJECT_SPECS: ProjectSpec[] = [
-    { name: `${DEMO_PREFIX} Alpha`,   status: ProjectStatus.PLANNING,    priority: ProjectPriority.HIGH,   startOffsetDays: 0,   endOffsetDays: 60 },
-    { name: `${DEMO_PREFIX} Beta`,    status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.MEDIUM, startOffsetDays: -20, endOffsetDays: 40 },
-    { name: `${DEMO_PREFIX} Gamma`,   status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.HIGH,   startOffsetDays: -10, endOffsetDays: 50 },
-    { name: `${DEMO_PREFIX} Delta`,   status: ProjectStatus.COMPLETED,   priority: ProjectPriority.LOW,    startOffsetDays: -90, endOffsetDays: -10 },
-    { name: `${DEMO_PREFIX} Epsilon`, status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.MEDIUM, startOffsetDays: -5,  endOffsetDays: 25 }
+    { name: `${DEMO_PREFIX} Alpha`,   client: "Northwind", projectType: "Web platform",    methodology: ProjectMethodology.SCRUM,  estimatedSprints: 6, budget: 24000, monthlyCost: null, billingModel: ProjectBillingModel.FIXED_PRICE, status: ProjectStatus.PLANNING,    priority: ProjectPriority.HIGH,   startOffsetDays: 0,   endOffsetDays: 60 },
+    { name: `${DEMO_PREFIX} Beta`,    client: "Orion",    projectType: "Mobile app",      methodology: ProjectMethodology.KANBAN, estimatedSprints: null, budget: null, monthlyCost: 4200, billingModel: ProjectBillingModel.RETAINER, status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.MEDIUM, startOffsetDays: -20, endOffsetDays: 40 },
+    { name: `${DEMO_PREFIX} Gamma`,   client: "Aster",    projectType: "Internal tools",   methodology: ProjectMethodology.SCRUM,  estimatedSprints: 4, budget: 18000, monthlyCost: null, billingModel: ProjectBillingModel.FIXED_PRICE, status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.HIGH,   startOffsetDays: -10, endOffsetDays: 50 },
+    { name: `${DEMO_PREFIX} Delta`,   client: "Helios",   projectType: "E-commerce",      methodology: ProjectMethodology.KANBAN, estimatedSprints: null, budget: null, monthlyCost: 5200, billingModel: ProjectBillingModel.TIME_AND_MATERIALS, status: ProjectStatus.COMPLETED,   priority: ProjectPriority.LOW,    startOffsetDays: -90, endOffsetDays: -10 },
+    { name: `${DEMO_PREFIX} Epsilon`, client: "Nova",     projectType: "Analytics suite",  methodology: ProjectMethodology.SCRUM,  estimatedSprints: 8, budget: 36000, monthlyCost: null, billingModel: ProjectBillingModel.FIXED_PRICE, status: ProjectStatus.IN_PROGRESS, priority: ProjectPriority.MEDIUM, startOffsetDays: -5,  endOffsetDays: 25 }
 ]
 
 const SPRINT_STATUS_CYCLE: SprintStatus[] = [
@@ -91,6 +98,13 @@ const findOrCreateProject = async (spec: ProjectSpec, ownerId: string): Promise<
     if (existing) {
         existing.status = spec.status
         existing.priority = spec.priority
+        existing.client = spec.client
+        existing.project_type = spec.projectType
+        existing.methodology = spec.methodology
+        existing.estimated_sprints = spec.estimatedSprints
+        existing.budget = spec.budget
+        existing.monthly_cost = spec.monthlyCost
+        existing.billing_model = spec.billingModel
         existing.start_date = addDays(today, spec.startOffsetDays)
         existing.end_date = spec.endOffsetDays !== null ? addDays(today, spec.endOffsetDays) : null
         const saved = await projectRepo.save(existing)
@@ -100,6 +114,13 @@ const findOrCreateProject = async (spec: ProjectSpec, ownerId: string): Promise<
     const created = projectRepo.create({
         name: spec.name,
         description: `Proyecto demo generado por seedFullDemo (${spec.status} / ${spec.priority}).`,
+        client: spec.client,
+        project_type: spec.projectType,
+        methodology: spec.methodology,
+        estimated_sprints: spec.estimatedSprints,
+        budget: spec.budget,
+        monthly_cost: spec.monthlyCost,
+        billing_model: spec.billingModel,
         start_date: addDays(today, spec.startOffsetDays),
         end_date: spec.endOffsetDays !== null ? addDays(today, spec.endOffsetDays) : null,
         status: spec.status,

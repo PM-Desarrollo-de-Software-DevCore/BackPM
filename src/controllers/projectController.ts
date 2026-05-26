@@ -5,7 +5,7 @@ import { getMyProjectsUseCase } from "../use-cases/projects/GetMyProjects"
 import { getProjectByIdUseCase } from "../use-cases/projects/GetProjectById"
 import { updateProjectUseCase } from "../use-cases/projects/UpdateProject"
 import { deleteProjectUseCase } from "../use-cases/projects/DeleteProject"
-import { ProjectPriority, ProjectStatus } from "../entities/Project"
+import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../entities/Project"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -13,11 +13,32 @@ export const createProjectController = async (req: AuthenticatedRequest, res: Re
             return res.status(401).json({ success: false, message: "Token invalido" })
         }
 
-        const { name, description, start_date, end_date, priority, status } = req.body
+        const {
+            name,
+            description,
+            client,
+            project_type,
+            methodology,
+            estimated_sprints,
+            budget,
+            monthly_cost,
+            billing_model,
+            start_date,
+            end_date,
+            priority,
+            status
+        } = req.body
 
         const result = await createProjectUseCase(
             name,
             description,
+            client,
+            project_type,
+            methodology as ProjectMethodology,
+            estimated_sprints ?? null,
+            budget ?? null,
+            monthly_cost ?? null,
+            billing_model ?? null,
             new Date(start_date),
             end_date ? new Date(end_date) : null,
             priority ?? ProjectPriority.MEDIUM,

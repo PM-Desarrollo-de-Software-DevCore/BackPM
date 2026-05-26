@@ -1,12 +1,19 @@
 import { createProject } from "../../infrastructure/repositories/ProjectRepository"
 import { findUserById } from "../../infrastructure/repositories/UserRepository"
-import { Project, ProjectPriority, ProjectStatus } from "../../entities/Project"
+import { Project, ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../../entities/Project"
 import { GlobalRole } from "../../entities/User"
 import { notifyProjectCreated } from "../../infrastructure/services/notificationService"
 
 export const createProjectUseCase = async (
     name: string,
     description: string | null,
+    client: string,
+    project_type: string,
+    methodology: ProjectMethodology,
+    estimated_sprints: number | null,
+    budget: number | null,
+    monthly_cost: number | null,
+    billing_model: ProjectBillingModel | null,
     start_date: Date,
     end_date: Date | null,
     priority: ProjectPriority,
@@ -30,6 +37,13 @@ export const createProjectUseCase = async (
     const project = await createProject({
         name,
         description,
+        client,
+        project_type,
+        methodology,
+        estimated_sprints: estimated_sprints ?? null,
+        budget: budget ?? null,
+        monthly_cost: monthly_cost ?? null,
+        billing_model: billing_model ?? null,
         start_date,
         end_date,
         priority,
