@@ -6,7 +6,8 @@ import {
     getMyProjectsController,
     getProjectByIdController,
     updateProjectController,
-    deleteProjectController
+    deleteProjectController,
+    getProjectReportController
 } from "../controllers/projectController"
 
 const router = Router()
@@ -215,5 +216,30 @@ router.put("/:projectId", requireAuth, validateUpdateProject, updateProjectContr
  *         description: No se pudo eliminar
  */
 router.delete("/:projectId", requireAuth, deleteProjectController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/report:
+ *   get:
+ *     summary: Generar reporte del proyecto en PDF
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: PDF del reporte
+ *       400:
+ *         description: Error al generar el reporte
+ *       401:
+ *         description: Token invalido
+ */
+router.get("/:projectId/report", getProjectReportController)
 
 export default router

@@ -1,4 +1,5 @@
 import { Response } from "express"
+import jwt, { JwtPayload } from "jsonwebtoken"
 import { AuthenticatedRequest } from "../middlewares/requireAuth"
 import { createProjectUseCase } from "../use-cases/projects/CreateProject"
 import { getMyProjectsUseCase } from "../use-cases/projects/GetMyProjects"
@@ -6,6 +7,8 @@ import { getProjectByIdUseCase } from "../use-cases/projects/GetProjectById"
 import { updateProjectUseCase } from "../use-cases/projects/UpdateProject"
 import { deleteProjectUseCase } from "../use-cases/projects/DeleteProject"
 import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../entities/Project"
+import { generateProjectReport } from "../use-cases/reports/GenerateProjectReport"
+import { JWT_SECRET } from "../config/env"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -123,6 +126,61 @@ export const deleteProjectController = async (req: AuthenticatedRequest, res: Re
         const result = await deleteProjectUseCase(projectId, req.userId)
 
         return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+const resolveReportUserId = (req: AuthenticatedRequest) => {
+    if (req.userId) {
+        return req.userId
+    }
+
+    const authHeader = req.headers.authorization
+    const headerToken = authHeader && authHeader.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : ""
+    const queryToken = typeof req.query.token === "string" ? req.query.token : ""
+    const token = headerToken || queryToken
+
+    if (!token) {
+        throw new Error("Token no proporcionado")
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET!)
+
+    if (typeof decoded === "string") {
+        throw new Error("Token invalido")
+    }
+
+    const payload = decoded as JwtPayload
+    const userId = payload.id
+
+    if (typeof userId !== "string") {
+        throw new Error("Token invalido")
+    }
+
+    return userId
+}
+
+export const getProjectReportController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = resolveReportUserId(req)
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const report = await generateProjectReport(projectId, userId)
+
+        const download = req.query.download === "1" || req.query.download === "true"
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Disposition", `${download ? "attachment" : "inline"}; filename="${report.filename}"`)
+        res.setHeader("Cache-Control", "no-store")
+
+        return res.status(200).send(report.buffer)
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
     }
