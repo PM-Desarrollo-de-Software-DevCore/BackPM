@@ -16,6 +16,7 @@ export interface Task {
     description: string | null,
     task_number: number,
     progress: number,
+    story_points: number | null,
     priority: TaskPriority,
     status: TaskStatus,
     end_date: Date | null,

@@ -28,6 +28,5 @@ export interface User {
     phoneNumber?: string | null,
     profileImageUrl?: string | null,
     cvUrl?: string | null,
-    specialty?: Specialty | null,
-    points?: number
+    specialty?: Specialty | null
 }

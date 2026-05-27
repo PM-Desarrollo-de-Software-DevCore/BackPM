@@ -9,6 +9,8 @@ import { deleteProjectUseCase } from "../use-cases/projects/DeleteProject"
 import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../entities/Project"
 import { generateProjectReport } from "../use-cases/reports/GenerateProjectReport"
 import { JWT_SECRET } from "../config/env"
+import { getProjectVelocityUseCase } from "../use-cases/projects/GetProjectVelocity"
+import { getProjectStoryPointsUseCase } from "../use-cases/projects/GetProjectStoryPoints"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -183,5 +185,43 @@ export const getProjectReportController = async (req: AuthenticatedRequest, res:
         return res.status(200).send(report.buffer)
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getProjectVelocityController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const result = await getProjectVelocityUseCase(projectId, req.userId)
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
+    }
+}
+
+export const getProjectStoryPointsController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const result = await getProjectStoryPointsUseCase(projectId, req.userId)
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
     }
 }
