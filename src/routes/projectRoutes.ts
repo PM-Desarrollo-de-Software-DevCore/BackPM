@@ -7,7 +7,9 @@ import {
     getProjectByIdController,
     updateProjectController,
     deleteProjectController,
-    getProjectReportController
+    getProjectReportController,
+    getProjectVelocityController,
+    getProjectStoryPointsController
 } from "../controllers/projectController"
 
 const router = Router()
@@ -123,6 +125,52 @@ router.get("/", requireAuth, getMyProjectsController)
  *         description: Proyecto no encontrado
  */
 router.get("/:projectId", requireAuth, getProjectByIdController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/velocity:
+ *   get:
+ *     summary: Velocity del proyecto (story points por sprint)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Comprometido vs completado por sprint y velocity promedio de sprints finalizados
+ *       404:
+ *         description: Proyecto no encontrado o sin acceso
+ */
+router.get("/:projectId/velocity", requireAuth, getProjectVelocityController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/story-points:
+ *   get:
+ *     summary: Resumen de story points del proyecto (backlog)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Puntos totales, desglose por estado y conteo de tareas estimadas/sin estimar
+ *       404:
+ *         description: Proyecto no encontrado o sin acceso
+ */
+router.get("/:projectId/story-points", requireAuth, getProjectStoryPointsController)
 
 /**
  * @swagger

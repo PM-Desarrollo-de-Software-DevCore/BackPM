@@ -11,6 +11,7 @@ export const createTaskUseCase = async (
         title: string
         description?: string | null
         progress: number
+        story_points?: number | null
         priority: TaskPriority
         status: TaskStatus
         end_date: Date | null
@@ -49,6 +50,12 @@ export const createTaskUseCase = async (
         throw new Error("El progreso debe estar entre 0 y 100")
     }
 
+    if (data.story_points !== undefined && data.story_points !== null) {
+        if (!Number.isInteger(data.story_points) || data.story_points < 0) {
+            throw new Error("Los story points deben ser un entero mayor o igual a 0")
+        }
+    }
+
     if (data.id_sprint) {
         const sprint = await getSprintById(data.id_sprint)
         if (!sprint) {
@@ -74,6 +81,7 @@ export const createTaskUseCase = async (
         description: data.description ?? null,
         task_number,
         progress: data.progress,
+        story_points: data.story_points ?? null,
         priority: data.priority,
         status: data.status,
         end_date: data.end_date,

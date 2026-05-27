@@ -2,6 +2,7 @@ import { OPENROUTER_API_KEY } from "../../config/env"
 import { GlobalRole } from "../../entities/User"
 import { findAllUsers } from "../../infrastructure/repositories/UserRepository"
 import { getProjectMembers } from "../../infrastructure/repositories/MemberProjectRepository"
+import { getCompletedStatsByUser } from "../../infrastructure/repositories/TaskRepository"
 
 type AssignmentScope = "project" | "task"
 
@@ -227,7 +228,7 @@ const countMatches = (terms: string[], candidates: Array<string | null | undefin
 }
 
 const buildReasons = (
-    user: { skill?: string | null; area?: string | null; points?: number },
+    completedTasks: number,
     signals: AssignmentSignals,
     skillMatches: number,
     areaMatches: number
@@ -242,7 +243,6 @@ const buildReasons = (
         reasons.push(`Alineado a ${areaMatches} area${areaMatches === 1 ? "" : "s"}`)
     }
 
-    const completedTasks = Math.floor((user.points ?? 0) / 10)
     if (completedTasks > 0) {
         reasons.push(`${completedTasks} tareas completadas`)
     }
@@ -278,7 +278,15 @@ export const recommendAssignees = async ({
     const candidates = allUsers.filter((user) => user.globalRole !== GlobalRole.ADMIN)
         .filter((user) => !projectMemberIds || projectMemberIds.has(user.id))
 
-    const maxPoints = Math.max(1, ...candidates.map((user) => user.points ?? 0))
+    // Experiencia/desempeno: story points de tareas COMPLETADAS por usuario (global),
+    // calculado en vivo desde las tareas en lugar del antiguo contador User.points.
+    const statsByUser = new Map(
+        (await getCompletedStatsByUser()).map((s) => [s.userId, s])
+    )
+    const completedPointsOf = (userId: string): number => statsByUser.get(userId)?.completedStoryPoints ?? 0
+    const completedTasksOf = (userId: string): number => statsByUser.get(userId)?.completedTaskCount ?? 0
+
+    const maxPoints = Math.max(1, ...candidates.map((user) => completedPointsOf(user.id)))
     const queryTerms = [
         ...signals.keywords,
         ...signals.skills,
@@ -289,7 +297,9 @@ export const recommendAssignees = async ({
     const ranked = candidates.map((user) => {
         const skillMatches = countMatches(queryTerms, [user.skill, user.area])
         const areaMatches = countMatches([...signals.areas, ...signals.keywords], [user.area])
-        const pointScore = Math.round(((user.points ?? 0) / maxPoints) * 35)
+        const completedPoints = completedPointsOf(user.id)
+        const completedTasks = completedTasksOf(user.id)
+        const pointScore = Math.round((completedPoints / maxPoints) * 35)
         const signalScore = Math.min(45, skillMatches * 15 + areaMatches * 10)
         const score = Math.min(100, signalScore + pointScore)
 
@@ -300,10 +310,10 @@ export const recommendAssignees = async ({
             email: user.email,
             skill: user.skill ?? null,
             area: user.area ?? null,
-            points: user.points ?? 0,
-            completedTasks: Math.floor((user.points ?? 0) / 10),
+            points: completedPoints,
+            completedTasks,
             score,
-            reasons: buildReasons(user, signals, skillMatches, areaMatches)
+            reasons: buildReasons(completedTasks, signals, skillMatches, areaMatches)
         }
     })
 

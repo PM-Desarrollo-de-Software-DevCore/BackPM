@@ -53,9 +53,6 @@ export class UserEntity {
     @Column({ type: "varchar", enum: Specialty, nullable: true })
     specialty: Specialty | null
 
-    @Column({ type: "int", default: 0 })
-    points: number
-
      // Relaciones
     @OneToMany(() => ProjectEntity, (project) => project.createdBy)
     projectsCreated: ProjectEntity[]

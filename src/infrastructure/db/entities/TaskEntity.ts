@@ -8,6 +8,7 @@ import { TaskStatus } from "../../../entities/Task"
 
 @Entity("task")
 @Check("CHK_task_progress_range", `"progress" >= 0 AND "progress" <= 100`)
+@Check("CHK_task_story_points_nonneg", `"story_points" >= 0`)
 export class TaskEntity {
     @PrimaryGeneratedColumn("uuid")
     id_task: string
@@ -23,6 +24,9 @@ export class TaskEntity {
 
     @Column({ type: "int", default: 0 })
     progress: number
+
+    @Column({ type: "int", nullable: true })
+    story_points: number | null
 
     @Column({ type: 'varchar', enum: TaskStatus, default: TaskStatus.PENDING })
     status: TaskStatus
