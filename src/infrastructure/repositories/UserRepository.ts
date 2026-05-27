@@ -1,6 +1,7 @@
 import { AppDataSource } from "../db/DataSource"
 import { UserEntity } from "../db/entities/UserEntity"
 import { User } from "../../entities/User"
+import { TaskStatus } from "../../entities/Task"
 
 // Hacer un select de la tabla user
 const repo = AppDataSource.getRepository(UserEntity)
@@ -49,29 +50,65 @@ export const clearResetToken = async (userId: string): Promise<void> => {
     })
 }
 
-export const incrementPoints = async (userId: string, delta: number): Promise<void> => {
-    await repo
-        .createQueryBuilder()
-        .update(UserEntity)
-        .set({ points: () => `CASE WHEN points + ${delta} < 0 THEN 0 ELSE points + ${delta} END` })
-        .where("id = :id", { id: userId })
-        .execute()
+// El leaderboard se calcula dinamicamente desde las tareas: los "puntos" de un
+// usuario son la suma de story_points de sus tareas COMPLETADAS (null = 0 puntos).
+export interface LeaderboardRow {
+    id: string
+    name: string
+    lastname: string
+    profileImageUrl: string | null
+    points: number
 }
 
-export const getLeaderboard = async (limit: number): Promise<User[]> => {
-    return await repo.find({
-        order: { points: "DESC", name: "ASC" },
-        take: limit
-    })
-}
+const SUM_COMPLETED_POINTS = `COALESCE(SUM(t."story_points"), 0)`
 
-export const getLeaderboardByProject = async (projectId: string, limit: number): Promise<User[]> => {
-    return await repo
+const mapLeaderboardRows = (rows: any[]): LeaderboardRow[] =>
+    rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        lastname: r.lastname,
+        profileImageUrl: r.profileImageUrl ?? null,
+        points: Number(r.points) || 0
+    }))
+
+export const getLeaderboard = async (limit: number): Promise<LeaderboardRow[]> => {
+    const rows = await repo
         .createQueryBuilder("u")
-        .innerJoin("member_project", "mp", `mp."id_user" = u."id"`)
-        .where(`mp."id_project" = :projectId`, { projectId })
-        .orderBy("u.points", "DESC")
+        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."status" = :status`, { status: TaskStatus.COMPLETED })
+        .select("u.id", "id")
+        .addSelect("u.name", "name")
+        .addSelect("u.lastname", "lastname")
+        .addSelect("u.profileImageUrl", "profileImageUrl")
+        .addSelect(SUM_COMPLETED_POINTS, "points")
+        .groupBy("u.id")
+        .addGroupBy("u.name")
+        .addGroupBy("u.lastname")
+        .addGroupBy("u.profileImageUrl")
+        .orderBy(SUM_COMPLETED_POINTS, "DESC")
         .addOrderBy("u.name", "ASC")
-        .take(limit)
-        .getMany()
+        .limit(limit)
+        .getRawMany()
+    return mapLeaderboardRows(rows)
+}
+
+export const getLeaderboardByProject = async (projectId: string, limit: number): Promise<LeaderboardRow[]> => {
+    const rows = await repo
+        .createQueryBuilder("u")
+        .innerJoin("member_project", "mp", `mp."id_user" = u."id" AND mp."id_project" = :projectId`)
+        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."id_project" = :projectId AND t."status" = :status`)
+        .select("u.id", "id")
+        .addSelect("u.name", "name")
+        .addSelect("u.lastname", "lastname")
+        .addSelect("u.profileImageUrl", "profileImageUrl")
+        .addSelect(SUM_COMPLETED_POINTS, "points")
+        .setParameters({ projectId, status: TaskStatus.COMPLETED })
+        .groupBy("u.id")
+        .addGroupBy("u.name")
+        .addGroupBy("u.lastname")
+        .addGroupBy("u.profileImageUrl")
+        .orderBy(SUM_COMPLETED_POINTS, "DESC")
+        .addOrderBy("u.name", "ASC")
+        .limit(limit)
+        .getRawMany()
+    return mapLeaderboardRows(rows)
 }

@@ -9,7 +9,7 @@ import {
  * @swagger
  * tags:
  *   name: Leaderboard
- *   description: Ranking de usuarios por puntos acumulados al completar tareas
+ *   description: Ranking de usuarios por story points de tareas completadas
  */
 
 export const leaderboardRouter = Router()
@@ -34,7 +34,7 @@ export const projectLeaderboardRouter = Router()
  *           default: 5
  *     responses:
  *       200:
- *         description: Lista de usuarios ordenada por puntos (descendente)
+ *         description: Lista de usuarios ordenada por story points completados (descendente)
  *         content:
  *           application/json:
  *             schema:
@@ -59,6 +59,7 @@ export const projectLeaderboardRouter = Router()
  *                         nullable: true
  *                       points:
  *                         type: integer
+ *                         description: Suma de story_points de tareas completadas asignadas al usuario
  *       401:
  *         description: No autorizado
  */
@@ -89,7 +90,7 @@ leaderboardRouter.get("/", requireAuth, getGlobalLeaderboardController)
  *           default: 5
  *     responses:
  *       200:
- *         description: Lista de miembros del proyecto ordenada por puntos (descendente)
+ *         description: Miembros del proyecto ordenados por story points completados en ese proyecto (descendente)
  *       401:
  *         description: No autorizado
  *       403:

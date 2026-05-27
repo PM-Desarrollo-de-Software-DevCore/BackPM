@@ -6,6 +6,7 @@ import {
     getTasksBySprintController,
     getTaskByIdController,
     updateTaskController,
+    updateTaskStoryPointsController,
     deleteTaskController
 } from "../controllers/taskController"
 
@@ -56,6 +57,12 @@ export const taskRouter = Router()
  *                 maximum: 100
  *                 example: 0
  *                 description: Porcentaje de avance (0-100)
+ *               story_points:
+ *                 type: integer
+ *                 minimum: 0
+ *                 nullable: true
+ *                 example: 5
+ *                 description: Estimación de esfuerzo (entero >= 0; null si la tarea no está estimada)
  *               assignedTo:
  *                 type: string
  *                 format: uuid
@@ -185,6 +192,11 @@ taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
  *                 type: integer
  *                 minimum: 0
  *                 maximum: 100
+ *               story_points:
+ *                 type: integer
+ *                 minimum: 0
+ *                 nullable: true
+ *                 description: Estimación de esfuerzo (entero >= 0; null para des-estimar)
  *               priority:
  *                 type: string
  *                 enum: [low, medium, high]
@@ -210,6 +222,43 @@ taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
  *         description: Error de validación
  */
 taskRouter.patch("/:taskId", requireAuth, updateTaskController)
+
+/**
+ * @swagger
+ * /tasks/{taskId}/story-points:
+ *   patch:
+ *     summary: Actualizar solo los story points de una tarea
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [story_points]
+ *             properties:
+ *               story_points:
+ *                 type: integer
+ *                 minimum: 0
+ *                 nullable: true
+ *                 example: 5
+ *                 description: Entero >= 0, o null para des-estimar la tarea
+ *     responses:
+ *       200:
+ *         description: Story points actualizados
+ *       400:
+ *         description: Error de validación o sin permisos
+ */
+taskRouter.patch("/:taskId/story-points", requireAuth, updateTaskStoryPointsController)
 
 /**
  * @swagger

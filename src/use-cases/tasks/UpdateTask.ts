@@ -2,12 +2,9 @@ import { getTaskById, updateTask } from "../../infrastructure/repositories/TaskR
 import { getUserRoleInProject, isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getSprintById } from "../../infrastructure/repositories/SprintRepository"
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
-import { incrementPoints } from "../../infrastructure/repositories/UserRepository"
 import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
 import { notifyTaskAssigned } from "../../infrastructure/services/notificationService"
-
-const POINTS_PER_TASK = 10
 
 export const updateTaskUseCase = async (
     taskId: string,
@@ -16,6 +13,7 @@ export const updateTaskUseCase = async (
         title?: string
         description?: string | null
         progress?: number
+        story_points?: number | null
         priority?: TaskPriority
         status?: TaskStatus
         end_date?: Date | null
@@ -48,6 +46,12 @@ export const updateTaskUseCase = async (
         }
     }
 
+    if (data.story_points !== undefined && data.story_points !== null) {
+        if (!Number.isInteger(data.story_points) || data.story_points < 0) {
+            throw new Error("Los story points deben ser un entero mayor o igual a 0")
+        }
+    }
+
     if (data.id_sprint) {
         const sprint = await getSprintById(data.id_sprint)
         if (!sprint) {
@@ -66,21 +70,8 @@ export const updateTaskUseCase = async (
     }
 
     const patch: Partial<typeof data> & { completedAt?: Date | null } = { ...data }
-    let pointsDelta = 0
-    let pointsRecipient: string | null = null
     if (data.status !== undefined && data.status !== task.status) {
         patch.completedAt = data.status === TaskStatus.COMPLETED ? new Date() : null
-
-        const finalAssignee = data.assignedTo !== undefined ? data.assignedTo : task.assignedTo
-        if (finalAssignee) {
-            if (data.status === TaskStatus.COMPLETED) {
-                pointsDelta = POINTS_PER_TASK
-                pointsRecipient = finalAssignee
-            } else if (task.status === TaskStatus.COMPLETED) {
-                pointsDelta = -POINTS_PER_TASK
-                pointsRecipient = finalAssignee
-            }
-        }
     }
 
     const updated = await updateTask(taskId, patch)
@@ -92,10 +83,6 @@ export const updateTaskUseCase = async (
     const assigneeChanged = data.assignedTo !== undefined && data.assignedTo !== task.assignedTo
     if (finalAssignee && assigneeChanged) {
         await notifyTaskAssigned(taskId, finalAssignee, userId)
-    }
-
-    if (pointsRecipient && pointsDelta !== 0) {
-        await incrementPoints(pointsRecipient, pointsDelta)
     }
 
     return updated

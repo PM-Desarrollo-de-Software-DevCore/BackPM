@@ -107,3 +107,28 @@ export const deleteTask = async (id: string): Promise<boolean> => {
     const result = await repo.delete({ id_task: id })
     return (result.affected ?? 0) > 0
 }
+
+export interface UserCompletedStats {
+    userId: string
+    completedStoryPoints: number
+    completedTaskCount: number
+}
+
+// Agrega, por usuario asignado, los story_points y el numero de tareas COMPLETADAS
+// (story_points null cuenta como 0). Usado por el leaderboard y el recomendador.
+export const getCompletedStatsByUser = async (): Promise<UserCompletedStats[]> => {
+    const rows = await repo.createQueryBuilder("task")
+        .select("task.assignedTo", "userId")
+        .addSelect(`COALESCE(SUM(task."story_points"), 0)`, "completedStoryPoints")
+        .addSelect("COUNT(*)", "completedTaskCount")
+        .where("task.status = :status", { status: TaskStatus.COMPLETED })
+        .andWhere("task.assignedTo IS NOT NULL")
+        .groupBy("task.assignedTo")
+        .getRawMany()
+
+    return rows.map((r) => ({
+        userId: r.userId,
+        completedStoryPoints: Number(r.completedStoryPoints) || 0,
+        completedTaskCount: Number(r.completedTaskCount) || 0
+    }))
+}
