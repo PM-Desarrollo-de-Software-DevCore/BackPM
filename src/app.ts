@@ -18,6 +18,7 @@ import dashboardRoutes from "./routes/dashboardRoutes"
 import { leaderboardRouter, projectLeaderboardRouter } from "./routes/leaderboardRoutes"
 import recommendationRoutes from "./routes/recommendationRoutes"
 import notificationRoutes from "./routes/notificationRoutes"
+import profileChangeRequestRoutes from "./routes/profileChangeRequestRoutes"
 
 const app = express()
 
@@ -46,6 +47,7 @@ app.use("/leaderboard", leaderboardRouter)
 app.use("/projects", projectLeaderboardRouter)
 app.use("/recommendations", recommendationRoutes)
 app.use("/notifications", notificationRoutes)
+app.use("/profile-change-requests", profileChangeRequestRoutes)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 AppDataSource.initialize()
