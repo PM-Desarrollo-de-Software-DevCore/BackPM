@@ -10,6 +10,7 @@ import { PORT } from "./config/env"
 import memberRoutes from "./routes/memberRoutes"
 import sprintRoutes from "./routes/sprintRoutes"
 import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRoutes"
+import { projectMilestoneRouter, milestoneRouter } from "./routes/milestoneRoutes"
 import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
 import { userTechnologyRouter, technologyRouter } from "./routes/userTechnologyRoutes"
 import dashboardRoutes from "./routes/dashboardRoutes"
@@ -30,6 +31,8 @@ app.use("/projects", projectTaskRouter)
 app.use("/sprints", sprintRoutes)
 app.use("/sprints", sprintTaskRouter)
 app.use("/tasks", taskRouter)
+app.use("/projects", projectMilestoneRouter)
+app.use("/milestones", milestoneRouter)
 app.use("/tasks", taskCommentRouter)
 app.use("/comments", commentRouter)
 app.use("/users", userRoutes)
