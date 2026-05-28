@@ -7,7 +7,11 @@ export enum NotificationCategory {
     TASK_OVERDUE = "task_overdue",
     ADMIN_USER_CREATED = "admin_user_created",
     ADMIN_USER_UPDATED = "admin_user_updated",
-    ADMIN_USER_DELETED = "admin_user_deleted"
+    ADMIN_USER_DELETED = "admin_user_deleted",
+    PROFILE_CHANGE_REQUESTED = "profile_change_requested",
+    PROFILE_CHANGE_APPROVED = "profile_change_approved",
+    PROFILE_CHANGE_REJECTED = "profile_change_rejected",
+    PROFILE_CHANGE_CANCELLED = "profile_change_cancelled"
 }
 
 export interface Notification {

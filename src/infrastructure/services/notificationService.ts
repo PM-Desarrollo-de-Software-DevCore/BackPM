@@ -178,6 +178,57 @@ export const notifyAdminUserChange = async (params: {
     })
 }
 
+export const notifyProfileChangeRequested = async (requestId: string, actorUserId: string) => {
+    const actor = await findUserById(actorUserId)
+    await notifyAdmins({
+        actorUserId,
+        category: NotificationCategory.PROFILE_CHANGE_REQUESTED,
+        title: "Nueva solicitud de modificación de perfil",
+        message: `${fullName(actor?.name, actor?.lastname)} solicitó modificar su perfil.`,
+        relatedType: "profile_change_request",
+        relatedId: requestId,
+    })
+}
+
+export const notifyProfileChangeApproved = async (requestId: string, recipientUserId: string, reviewerUserId: string) => {
+    const reviewer = await findUserById(reviewerUserId)
+    await createNotification({
+        recipientUserId,
+        actorUserId: reviewerUserId,
+        category: NotificationCategory.PROFILE_CHANGE_APPROVED,
+        title: "Tu solicitud de modificación fue aprobada",
+        message: `${fullName(reviewer?.name, reviewer?.lastname)} aprobó tu solicitud de modificación de perfil.`,
+        relatedType: "profile_change_request",
+        relatedId: requestId,
+    })
+}
+
+export const notifyProfileChangeRejected = async (requestId: string, recipientUserId: string, reviewerUserId: string, note: string | null) => {
+    const reviewer = await findUserById(reviewerUserId)
+    const reason = note && note.trim().length > 0 ? ` Motivo: ${note.trim()}` : ""
+    await createNotification({
+        recipientUserId,
+        actorUserId: reviewerUserId,
+        category: NotificationCategory.PROFILE_CHANGE_REJECTED,
+        title: "Tu solicitud de modificación fue rechazada",
+        message: `${fullName(reviewer?.name, reviewer?.lastname)} rechazó tu solicitud de modificación de perfil.${reason}`,
+        relatedType: "profile_change_request",
+        relatedId: requestId,
+    })
+}
+
+export const notifyProfileChangeCancelled = async (requestId: string, actorUserId: string) => {
+    const actor = await findUserById(actorUserId)
+    await notifyAdmins({
+        actorUserId,
+        category: NotificationCategory.PROFILE_CHANGE_CANCELLED,
+        title: "Solicitud de modificación cancelada",
+        message: `${fullName(actor?.name, actor?.lastname)} canceló su solicitud de modificación de perfil.`,
+        relatedType: "profile_change_request",
+        relatedId: requestId,
+    })
+}
+
 export const getNotificationFeed = async (userId: string, limit = 20) => {
     await ensureOverdueTaskNotificationsForUser(userId)
 
