@@ -7,6 +7,7 @@ import {
     getTaskByIdController,
     updateTaskController,
     updateTaskStoryPointsController,
+    updateTaskStatusController,
     deleteTaskController
 } from "../controllers/taskController"
 
@@ -259,6 +260,47 @@ taskRouter.patch("/:taskId", requireAuth, updateTaskController)
  *         description: Error de validación o sin permisos
  */
 taskRouter.patch("/:taskId/story-points", requireAuth, updateTaskStoryPointsController)
+
+/**
+ * @swagger
+ * /tasks/{taskId}/status:
+ *   patch:
+ *     summary: Cambiar solo el estado de una tarea
+ *     description: >
+ *       Actualiza únicamente el estado. Al pasar a "completed" se registra completedAt
+ *       (lo que alimenta el leaderboard); al salir de "completed" se limpia.
+ *       Permitido al PM/Scrum Master del proyecto o al usuario asignado.
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, in_progress, completed]
+ *                 example: in_progress
+ *     responses:
+ *       200:
+ *         description: Estado actualizado
+ *       400:
+ *         description: Error de validación o sin permisos
+ *       401:
+ *         description: No autorizado
+ */
+taskRouter.patch("/:taskId/status", requireAuth, updateTaskStatusController)
 
 /**
  * @swagger

@@ -52,6 +52,10 @@ export const updateTaskUseCase = async (
         }
     }
 
+    if (data.status !== undefined && !Object.values(TaskStatus).includes(data.status)) {
+        throw new Error("El estado no es válido")
+    }
+
     if (data.id_sprint) {
         const sprint = await getSprintById(data.id_sprint)
         if (!sprint) {
