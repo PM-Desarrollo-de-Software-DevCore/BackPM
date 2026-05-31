@@ -27,6 +27,7 @@ export interface Project {
     description: string | null
     client: string
     project_type: string
+    project_objective: string | null
     methodology: ProjectMethodology
     estimated_sprints: number | null
     budget: number | null
