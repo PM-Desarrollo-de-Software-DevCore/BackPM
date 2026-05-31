@@ -9,6 +9,7 @@ type ProjectSeed = {
     name: string
     client: string
     project_type: string
+    project_objective: string
     methodology: ProjectMethodology
     estimated_sprints: number | null
     budget: number | null
@@ -25,6 +26,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Atlas Platform",
         client: "Atlas Foods",
         project_type: "Web platform",
+        project_objective: "Lanzar una plataforma central para ventas y operaciones.",
         methodology: ProjectMethodology.SCRUM,
         estimated_sprints: 6,
         budget: 28000,
@@ -39,6 +41,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Boreal Mobile",
         client: "Boreal Health",
         project_type: "Mobile app",
+        project_objective: "Mejorar el acceso móvil a servicios de salud.",
         methodology: ProjectMethodology.KANBAN,
         estimated_sprints: null,
         budget: null,
@@ -53,6 +56,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Cinder Ops",
         client: "Cinder Logistics",
         project_type: "Internal tooling",
+        project_objective: "Automatizar flujos internos y reportes operativos.",
         methodology: ProjectMethodology.SCRUM,
         estimated_sprints: 4,
         budget: 16000,
@@ -67,6 +71,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Drift Commerce",
         client: "Drift Commerce",
         project_type: "E-commerce",
+        project_objective: "Optimizar la experiencia de compra y conversión.",
         methodology: ProjectMethodology.KANBAN,
         estimated_sprints: null,
         budget: null,
@@ -81,6 +86,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Ember Insights",
         client: "Ember Analytics",
         project_type: "Analytics suite",
+        project_objective: "Consolidar métricas clave para toma de decisiones.",
         methodology: ProjectMethodology.SCRUM,
         estimated_sprints: 8,
         budget: 42000,
@@ -95,6 +101,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Flux Support",
         client: "Flux Studio",
         project_type: "Support portal",
+        project_objective: "Centralizar tickets y autoservicio para clientes.",
         methodology: ProjectMethodology.KANBAN,
         estimated_sprints: null,
         budget: null,
@@ -109,6 +116,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Grove CRM",
         client: "Grove Realty",
         project_type: "CRM",
+        project_objective: "Unificar la gestión de leads y relaciones comerciales.",
         methodology: ProjectMethodology.SCRUM,
         estimated_sprints: 5,
         budget: 21000,
@@ -123,6 +131,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Harbor Admin",
         client: "Harbor Fintech",
         project_type: "Admin panel",
+        project_objective: "Dar visibilidad operativa a equipos internos.",
         methodology: ProjectMethodology.KANBAN,
         estimated_sprints: null,
         budget: null,
@@ -137,6 +146,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Ivory Scheduler",
         client: "Ivory Education",
         project_type: "Scheduling system",
+        project_objective: "Organizar agendas y disponibilidad en tiempo real.",
         methodology: ProjectMethodology.SCRUM,
         estimated_sprints: 7,
         budget: 30000,
@@ -151,6 +161,7 @@ const PROJECT_SEEDS: ProjectSeed[] = [
         name: "[SEED] Juniper Data",
         client: "Juniper Labs",
         project_type: "Data platform",
+        project_objective: "Construir una base de datos analítica escalable.",
         methodology: ProjectMethodology.KANBAN,
         estimated_sprints: null,
         budget: null,
@@ -195,6 +206,7 @@ const upsertProject = async (seed: ProjectSeed, ownerId: string): Promise<Projec
         description: `Registro de prueba para ${seed.client} (${seed.project_type}).`,
         client: seed.client,
         project_type: seed.project_type,
+        project_objective: seed.project_objective,
         methodology: seed.methodology,
         estimated_sprints: seed.estimated_sprints,
         budget: seed.budget,
