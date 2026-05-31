@@ -22,6 +22,9 @@ export class ProjectEntity {
     @Column({ type: "nvarchar", length: 255 })
     project_type: string
 
+    @Column({ type: "nvarchar", length: "MAX", nullable: true })
+    project_objective: string | null
+
     @Column({ type: "varchar", length: 20, enum: ProjectMethodology })
     methodology: ProjectMethodology
 

@@ -42,6 +42,10 @@ const router = Router()
  *               project_type:
  *                 type: string
  *                 example: "Web app"
+ *               project_objective:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "Launch a central portal for customer onboarding"
  *               methodology:
  *                 type: string
  *                 enum: [scrum, kanban]
@@ -203,6 +207,9 @@ router.get("/:projectId/story-points", requireAuth, getProjectStoryPointsControl
  *                 type: string
  *               project_type:
  *                 type: string
+ *               project_objective:
+ *                 type: string
+ *                 nullable: true
  *               methodology:
  *                 type: string
  *                 enum: [scrum, kanban]
