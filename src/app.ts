@@ -13,6 +13,7 @@ import { projectTaskRouter, sprintTaskRouter, taskRouter } from "./routes/taskRo
 import { projectMilestoneRouter, milestoneRouter } from "./routes/milestoneRoutes"
 import { projectProgressEntryRouter, progressEntryRouter } from "./routes/progressEntryRoutes"
 import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
+import { taskTimeEntryRouter, timeEntryRouter, projectTimeEntryRouter } from "./routes/timeEntryRoutes"
 import { userTechnologyRouter, technologyRouter } from "./routes/userTechnologyRoutes"
 import dashboardRoutes from "./routes/dashboardRoutes"
 import { leaderboardRouter, projectLeaderboardRouter } from "./routes/leaderboardRoutes"
@@ -39,6 +40,9 @@ app.use("/projects", projectProgressEntryRouter)
 app.use("/progress-entries", progressEntryRouter)
 app.use("/tasks", taskCommentRouter)
 app.use("/comments", commentRouter)
+app.use("/tasks", taskTimeEntryRouter)
+app.use("/time-entries", timeEntryRouter)
+app.use("/projects", projectTimeEntryRouter)
 app.use("/users", userRoutes)
 app.use("/users", userTechnologyRouter)
 app.use("/technologies", technologyRouter)
