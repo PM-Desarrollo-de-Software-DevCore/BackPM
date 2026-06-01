@@ -1,14 +1,19 @@
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
-import { addMemberToProject, isMemberProject, countProjectManagers } from "../../infrastructure/repositories/MemberProjectRepository"
+import { addMemberToProject, isMemberProject, countMembersByRole } from "../../infrastructure/repositories/MemberProjectRepository"
 import { findUserById } from "../../infrastructure/repositories/UserRepository"
 import { GlobalRole } from "../../entities/User"
 import { ProjectRole } from "../../entities/MemberProject"
 import { notifyProjectMemberAdded } from "../../infrastructure/services/notificationService"
 
+// Roles de los que solo puede haber uno por proyecto.
+const UNIQUE_ROLES: ProjectRole[] = [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
+
 export const addMemberToProjectUseCase = async (
     projectId: string,
     userIdToAdd: string,
     roleToAssign: ProjectRole,
+    fte: number | null,
+    monthlyRate: number | null,
     adminUserId: string,
     adminGlobalRole: GlobalRole
 ): Promise<any> => {
@@ -35,15 +40,15 @@ export const addMemberToProjectUseCase = async (
         throw new Error("El usuario ya es miembro de este proyecto")
     }
 
-    // Si se intenta asignar project_manager, validar que solo haya 1 por proyecto
-    if (roleToAssign === ProjectRole.PROJECT_MANAGER) {
-        const pmCount = await countProjectManagers(projectId)
-        if (pmCount > 0) {
-            throw new Error("Este proyecto ya tiene un project_manager asignado")
+    // Roles unicos (project_manager, team_lead): maximo uno por proyecto.
+    if (UNIQUE_ROLES.includes(roleToAssign)) {
+        const count = await countMembersByRole(projectId, roleToAssign)
+        if (count > 0) {
+            throw new Error(`Este proyecto ya tiene un ${roleToAssign} asignado`)
         }
     }
 
-    const member = await addMemberToProject(userIdToAdd, projectId, roleToAssign)
+    const member = await addMemberToProject(userIdToAdd, projectId, roleToAssign, fte, monthlyRate)
     await notifyProjectMemberAdded(projectId, userIdToAdd, adminUserId)
     return member
 }

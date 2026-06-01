@@ -3,18 +3,28 @@ import { z } from "zod"
 
 const uuidSchema = z.string().uuid("Id invalido")
 
-const addMemberBodySchema = z.object({
-    userId: z.string().uuid("userId invalido"),
-    role: z.enum(["project_manager", "scrum_master", "developer"], {
-        message: "Rol invalido"
-    })
+const roleSchema = z.enum(["project_manager", "scrum_master", "developer", "team_lead"], {
+    message: "Rol invalido"
 })
 
-const updateMemberRoleBodySchema = z.object({
-    role: z.enum(["project_manager", "scrum_master", "developer"], {
-        message: "Rol invalido"
-    })
+const fteSchema = z.number().positive("El FTE debe ser mayor a 0").max(1, "El FTE no puede ser mayor a 1").nullable().optional()
+const monthlyRateSchema = z.number().nonnegative("El rate no puede ser negativo").nullable().optional()
+
+const addMemberBodySchema = z.object({
+    userId: z.string().uuid("userId invalido"),
+    role: roleSchema,
+    fte: fteSchema,
+    monthly_rate: monthlyRateSchema
 })
+
+const updateMemberBodySchema = z.object({
+    role: roleSchema.optional(),
+    fte: fteSchema,
+    monthly_rate: monthlyRateSchema
+}).refine(
+    (data) => data.role !== undefined || data.fte !== undefined || data.monthly_rate !== undefined,
+    { message: "Debes enviar al menos un campo para actualizar (role, fte o monthly_rate)" }
+)
 
 export const validateProjectIdParam = (req: Request, res: Response, next: NextFunction) => {
     const result = uuidSchema.safeParse(req.params.projectId)
@@ -55,8 +65,8 @@ export const validateAddMemberBody = (req: Request, res: Response, next: NextFun
     next()
 }
 
-export const validateUpdateMemberRoleBody = (req: Request, res: Response, next: NextFunction) => {
-    const result = updateMemberRoleBodySchema.safeParse(req.body)
+export const validateUpdateMemberBody = (req: Request, res: Response, next: NextFunction) => {
+    const result = updateMemberBodySchema.safeParse(req.body)
 
     if (!result.success) {
         const message = result.error.issues[0]?.message || "Error de validacion"

@@ -1,6 +1,7 @@
 import { Project } from "../../entities/Project"
 import { Sprint } from "../../entities/Sprint"
 import { Task } from "../../entities/Task"
+import { computeProjectFinancialSummary } from "../projects/GetProjectFinancialSummary"
 
 export interface ProjectReportStats {
     totalTasks: number
@@ -13,6 +14,22 @@ export interface ProjectReportStats {
     activeSprints: number
     finishedSprints: number
     plannedSprints: number
+}
+
+export interface ReportFinancialSummary {
+    hasData: boolean
+    budget: number | null
+    monthlyCost: number | null
+    billingModel: string | null
+    estimatedSpend: number | null
+    remainingBudget: number | null
+    budgetConsumedRatio: number | null
+    timeProgressRatio: number | null
+    runwayMonths: number | null
+    budgetCoversPlannedEnd: boolean | null
+    projectedOverBudget: number | null
+    costPerStoryPoint: number | null
+    costPerEstimatedSprint: number | null
 }
 
 export interface ProjectReportContext {
@@ -33,6 +50,7 @@ export interface ProjectReportContext {
     sprintBreakdown: Array<{ label: string; value: number }>
     upcomingTasks: Array<{ title: string; status: string; endDate: string | null; progress: number }>
     sprints: Array<{ name: string; status: string; startDate: string; endDate: string }>
+    financial: ReportFinancialSummary
 }
 
 export interface ProjectReportInsights {
@@ -120,6 +138,7 @@ export const buildProjectReportContext = (
     sprints: Sprint[]
 ): ProjectReportContext => {
     const now = new Date()
+    const fin = computeProjectFinancialSummary(project, tasks)
     const totalTasks = tasks.length
     const completedTasks = tasks.filter((task) => task.status === "completed").length
     const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length
@@ -188,5 +207,20 @@ export const buildProjectReportContext = (
                 startDate: sprint.start_date.toISOString(),
                 endDate: sprint.end_date.toISOString(),
             })),
+        financial: {
+            hasData: fin.budget !== null || fin.monthlyCost !== null,
+            budget: fin.budget,
+            monthlyCost: fin.monthlyCost,
+            billingModel: fin.billingModel,
+            estimatedSpend: fin.estimatedSpend,
+            remainingBudget: fin.remainingBudget,
+            budgetConsumedRatio: fin.budgetConsumedRatio,
+            timeProgressRatio: fin.timeProgressRatio,
+            runwayMonths: fin.runwayMonths,
+            budgetCoversPlannedEnd: fin.budgetCoversPlannedEnd,
+            projectedOverBudget: fin.projectedOverBudget,
+            costPerStoryPoint: fin.costPerStoryPoint,
+            costPerEstimatedSprint: fin.costPerEstimatedSprint,
+        },
     }
 }

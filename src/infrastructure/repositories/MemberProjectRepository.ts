@@ -25,13 +25,21 @@ export const getUserRoleInProject = async (userId: string, projectId: string): P
     return member?.role || null
 }
 
-export const addMemberToProject = async (userId: string,projectId: string, role: ProjectRole): Promise<MemberProject> => {
+export const addMemberToProject = async (
+    userId: string,
+    projectId: string,
+    role: ProjectRole,
+    fte: number | null = null,
+    monthlyRate: number | null = null
+): Promise<MemberProject> => {
     const member = repo.create({
         id_user: userId,
         id_project: projectId,
-        role
+        role,
+        fte,
+        monthly_rate: monthlyRate
     })
-    
+
     return await repo.save(member)
 }
 
@@ -47,6 +55,15 @@ export const updateMemberRole = async (userId: string, projectId: string, newRol
     return await isMemberProject(userId, projectId)
 }
 
+export const updateMember = async (
+    userId: string,
+    projectId: string,
+    data: Partial<Pick<MemberProject, "role" | "fte" | "monthly_rate">>
+): Promise<MemberProject | null> => {
+    await repo.update({ id_user: userId, id_project: projectId }, data)
+    return await isMemberProject(userId, projectId)
+}
+
 export const removeMemberFromProject = async (userId: string, projectId: string): Promise<boolean> => {
     const result = await repo.delete({ id_user: userId, id_project: projectId })
     return (result.affected ?? 0) > 0
@@ -57,6 +74,15 @@ export const countProjectManagers = async (projectId: string): Promise<number> =
         where: {
             id_project: projectId,
             role: ProjectRole.PROJECT_MANAGER
+        }
+    })
+}
+
+export const countMembersByRole = async (projectId: string, role: ProjectRole): Promise<number> => {
+    return await repo.count({
+        where: {
+            id_project: projectId,
+            role
         }
     })
 }

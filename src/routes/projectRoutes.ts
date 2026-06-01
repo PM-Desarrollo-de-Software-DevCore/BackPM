@@ -9,7 +9,9 @@ import {
     deleteProjectController,
     getProjectReportController,
     getProjectVelocityController,
-    getProjectStoryPointsController
+    getProjectStoryPointsController,
+    getProjectFinancialSummaryController,
+    getProjectEvmController
 } from "../controllers/projectController"
 
 const router = Router()
@@ -175,6 +177,62 @@ router.get("/:projectId/velocity", requireAuth, getProjectVelocityController)
  *         description: Proyecto no encontrado o sin acceso
  */
 router.get("/:projectId/story-points", requireAuth, getProjectStoryPointsController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/financial-summary:
+ *   get:
+ *     summary: Resumen financiero del proyecto (presupuesto, runway, burn y costos unitarios)
+ *     description: >
+ *       Deriva indicadores financieros a partir de budget, monthly_cost, fechas y story points.
+ *       El gasto es una estimacion (costo mensual * meses transcurridos), no costo real.
+ *       Los campos derivados se devuelven como null cuando faltan los datos de entrada.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Runway, presupuesto consumido, serie de burn, costo por story point y notas de datos faltantes
+ *       404:
+ *         description: Proyecto no encontrado o sin acceso
+ */
+router.get("/:projectId/financial-summary", requireAuth, getProjectFinancialSummaryController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/evm:
+ *   get:
+ *     summary: Earned Value Management del proyecto (PV, EV, AC, CPI, SPI, EAC)
+ *     description: >
+ *       Metricas EVM a la fecha de estado mas una serie mensual (S-curve) de PV/EV/AC.
+ *       EV se basa en story points (o conteo de tareas si no hay SP). AC se estima con los
+ *       rates de los miembros (monthly_rate x fte) o, en su defecto, el monthly_cost del proyecto:
+ *       el SPI es confiable, pero CPI/EAC son indicativos hasta tener time tracking.
+ *       Los campos se devuelven null cuando faltan los datos de entrada.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Metricas EVM, indices, serie S-curve y notas de supuestos
+ *       404:
+ *         description: Proyecto no encontrado o sin acceso
+ */
+router.get("/:projectId/evm", requireAuth, getProjectEvmController)
 
 /**
  * @swagger
