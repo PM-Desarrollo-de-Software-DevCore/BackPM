@@ -15,6 +15,7 @@ import { projectProgressEntryRouter, progressEntryRouter } from "./routes/progre
 import { taskCommentRouter, commentRouter } from "./routes/commentRoutes"
 import { taskTimeEntryRouter, timeEntryRouter, projectTimeEntryRouter } from "./routes/timeEntryRoutes"
 import { projectExpenseRouter, expenseRouter } from "./routes/expenseRoutes"
+import { projectInvoiceRouter, invoiceRouter } from "./routes/invoiceRoutes"
 import { userTechnologyRouter, technologyRouter } from "./routes/userTechnologyRoutes"
 import dashboardRoutes from "./routes/dashboardRoutes"
 import { leaderboardRouter, projectLeaderboardRouter } from "./routes/leaderboardRoutes"
@@ -46,6 +47,8 @@ app.use("/time-entries", timeEntryRouter)
 app.use("/projects", projectTimeEntryRouter)
 app.use("/projects", projectExpenseRouter)
 app.use("/expenses", expenseRouter)
+app.use("/projects", projectInvoiceRouter)
+app.use("/invoices", invoiceRouter)
 app.use("/users", userRoutes)
 app.use("/users", userTechnologyRouter)
 app.use("/technologies", technologyRouter)
