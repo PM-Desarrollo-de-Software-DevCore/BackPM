@@ -42,6 +42,12 @@ const formatDate = (value: string | null) => {
     }).format(new Date(value))
 }
 
+const formatMoney = (value: number | null) =>
+    value === null ? "N/A" : new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value)
+
+const formatPercent = (ratio: number | null) =>
+    ratio === null ? "N/A" : `${Math.round(ratio * 100)}%`
+
 const parseInsights = (content: string): ProjectReportInsights | null => {
     const match = content.match(/\{[\s\S]*\}/)
 
@@ -180,25 +186,45 @@ const callOpenRouter = async (context: ProjectReportContext): Promise<ProjectRep
 }
 
 const buildLocalInsights = (context: ProjectReportContext): ProjectReportInsights => {
-    const { project, stats } = context
+    const { project, stats, financial } = context
     const completionRate = stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0
+
+    const highlights = [
+        `${stats.completedTasks} completed tasks and ${stats.averageProgress}% average progress`,
+        `${stats.activeSprints} active sprint${stats.activeSprints === 1 ? "" : "s"} and ${stats.plannedSprints} planned sprint${stats.plannedSprints === 1 ? "" : "s"}`,
+        `${stats.inProgressTasks} task${stats.inProgressTasks === 1 ? "" : "s"} currently in progress`,
+    ]
+
+    const risks = [
+        stats.overdueTasks > 0
+            ? `${stats.overdueTasks} task${stats.overdueTasks === 1 ? "" : "s"} are overdue.`
+            : "No overdue tasks detected in the current snapshot.",
+        stats.pendingTasks > 0
+            ? `${stats.pendingTasks} pending task${stats.pendingTasks === 1 ? "" : "s"} may affect delivery if they stay blocked.`
+            : "Backlog pressure is currently low.",
+    ]
+
+    if (financial.hasData && financial.budgetConsumedRatio !== null) {
+        highlights.push(
+            `Budget consumed at ${formatPercent(financial.budgetConsumedRatio)}${financial.timeProgressRatio !== null ? ` with ${formatPercent(financial.timeProgressRatio)} of the timeline elapsed` : ""}.`
+        )
+    }
+
+    if (financial.projectedOverBudget !== null && financial.projectedOverBudget > 0) {
+        risks.push(`At the current monthly cost the project is projected to exceed its budget by ${formatMoney(financial.projectedOverBudget)}.`)
+    } else if (
+        financial.budgetConsumedRatio !== null &&
+        financial.timeProgressRatio !== null &&
+        financial.budgetConsumedRatio > financial.timeProgressRatio + 0.15
+    ) {
+        risks.push("Budget is being consumed faster than the schedule is progressing.")
+    }
 
     return {
         title: `${project.name} Report`,
         executiveSummary: `The project currently tracks ${stats.totalTasks} tasks with a ${completionRate}% completion rate and ${stats.totalSprints} sprint${stats.totalSprints === 1 ? "" : "s"}.`,
-        highlights: [
-            `${stats.completedTasks} completed tasks and ${stats.averageProgress}% average progress`,
-            `${stats.activeSprints} active sprint${stats.activeSprints === 1 ? "" : "s"} and ${stats.plannedSprints} planned sprint${stats.plannedSprints === 1 ? "" : "s"}`,
-            `${stats.inProgressTasks} task${stats.inProgressTasks === 1 ? "" : "s"} currently in progress`,
-        ],
-        risks: [
-            stats.overdueTasks > 0
-                ? `${stats.overdueTasks} task${stats.overdueTasks === 1 ? "" : "s"} are overdue.`
-                : "No overdue tasks detected in the current snapshot.",
-            stats.pendingTasks > 0
-                ? `${stats.pendingTasks} pending task${stats.pendingTasks === 1 ? "" : "s"} may affect delivery if they stay blocked.`
-                : "Backlog pressure is currently low.",
-        ],
+        highlights,
+        risks,
         recommendations: [
             "Prioritize overdue and in-progress tasks before opening new scope.",
             "Review sprint capacity and redistribute work if average progress stays flat.",
@@ -280,6 +306,28 @@ const buildPdfBuffer = async (context: ProjectReportContext, insights: ProjectRe
     document.text(`Active sprints: ${context.stats.activeSprints}`)
     document.text(`Finished sprints: ${context.stats.finishedSprints}`)
     document.text(`Planned sprints: ${context.stats.plannedSprints}`)
+
+    document.moveDown(1)
+    document.fontSize(14).fillColor("#0f172a").text("Financial Overview")
+    document.moveDown(0.4)
+    document.fontSize(11).fillColor("#334155")
+
+    const fin = context.financial
+    if (!fin.hasData) {
+        document.text("No financial data captured for this project.")
+    } else {
+        document.text(`Budget: ${formatMoney(fin.budget)}`)
+        document.text(`Monthly cost: ${formatMoney(fin.monthlyCost)}`)
+        document.text(`Billing model: ${fin.billingModel ?? "N/A"}`)
+        document.text(`Estimated spend to date: ${formatMoney(fin.estimatedSpend)}`)
+        document.text(`Remaining budget: ${formatMoney(fin.remainingBudget)}`)
+        document.text(`Budget consumed: ${formatPercent(fin.budgetConsumedRatio)} (time elapsed: ${formatPercent(fin.timeProgressRatio)})`)
+        document.text(`Runway: ${fin.runwayMonths !== null ? `${fin.runwayMonths} months` : "N/A"}`)
+        document.text(`Budget covers planned end: ${fin.budgetCoversPlannedEnd === null ? "N/A" : fin.budgetCoversPlannedEnd ? "Yes" : "No"}`)
+        document.text(`Projected over budget: ${formatMoney(fin.projectedOverBudget)}`)
+        document.text(`Cost per story point: ${formatMoney(fin.costPerStoryPoint)}`)
+        document.text(`Cost per estimated sprint: ${formatMoney(fin.costPerEstimatedSprint)}`)
+    }
 
     addBulletSection(document, "Highlights", insights.highlights)
     addBulletSection(document, "Risks", insights.risks)
