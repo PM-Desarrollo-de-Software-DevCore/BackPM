@@ -2,7 +2,7 @@ import { getProjectById } from "../../infrastructure/repositories/ProjectReposit
 import { isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
 import { Task, TaskStatus } from "../../entities/Task"
-import { ProjectBillingModel } from "../../entities/Project"
+import { Project, ProjectBillingModel } from "../../entities/Project"
 
 // Mes promedio (365.25 / 12 dias) para las conversiones de tiempo a meses.
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * (365.25 / 12)
@@ -128,6 +128,15 @@ export const getProjectFinancialSummaryUseCase = async (
     }
 
     const tasks = await getTasksByProject(projectId)
+
+    return computeProjectFinancialSummary(project, tasks)
+}
+
+// Logica pura del resumen financiero, reutilizable sin acceso a BD (p.ej. en el reporte PDF).
+export const computeProjectFinancialSummary = (
+    project: Project,
+    tasks: Task[]
+): ProjectFinancialSummaryResponse => {
     const now = new Date()
 
     const { billing_model: billingModel, start_date: startDate, end_date: endDate, estimated_sprints: estimatedSprints } = project
