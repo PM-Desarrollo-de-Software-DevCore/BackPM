@@ -11,6 +11,7 @@ import { generateProjectReport } from "../use-cases/reports/GenerateProjectRepor
 import { JWT_SECRET } from "../config/env"
 import { getProjectVelocityUseCase } from "../use-cases/projects/GetProjectVelocity"
 import { getProjectStoryPointsUseCase } from "../use-cases/projects/GetProjectStoryPoints"
+import { getProjectFinancialSummaryUseCase } from "../use-cases/projects/GetProjectFinancialSummary"
 
 export const createProjectController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -221,6 +222,25 @@ export const getProjectStoryPointsController = async (req: AuthenticatedRequest,
         }
 
         const result = await getProjectStoryPointsUseCase(projectId, req.userId)
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(404).json({ success: false, message: error.message })
+    }
+}
+
+export const getProjectFinancialSummaryController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const projectId = req.params.projectId
+        if (typeof projectId !== "string") {
+            return res.status(400).json({ success: false, message: "projectId invalido" })
+        }
+
+        const result = await getProjectFinancialSummaryUseCase(projectId, req.userId)
 
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
