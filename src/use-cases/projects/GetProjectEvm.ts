@@ -3,6 +3,7 @@ import { isMemberProject } from "../../infrastructure/repositories/MemberProject
 import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
 import { getProjectMembers } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getTimeEntriesByProject } from "../../infrastructure/repositories/TimeEntryRepository"
+import { getExpensesByProject } from "../../infrastructure/repositories/ExpenseRepository"
 import { Task, TaskStatus } from "../../entities/Task"
 import { computeProjectFinancialSummary } from "./GetProjectFinancialSummary"
 
@@ -33,10 +34,12 @@ export interface ProjectEvmResponse {
     totalStoryPoints: number
     completedStoryPoints: number
 
-    // Costo para AC
-    acMonthlyCost: number | null // costo mensual (solo para fuentes basadas en tasa mensual)
-    acSource: AcSource | null
+    // Costo para AC (AC = laborCost + expensesTotal)
+    acMonthlyCost: number | null // costo mensual de labor (solo para fuentes basadas en tasa mensual)
+    acSource: AcSource | null // base del costo de labor
     loggedHours: number
+    laborCost: number | null
+    expensesTotal: number
 
     // Metricas EVM a la fecha de estado
     plannedValue: number | null // PV
@@ -89,6 +92,7 @@ export const getProjectEvmUseCase = async (
     const tasks = await getTasksByProject(projectId)
     const members = await getProjectMembers(projectId)
     const timeEntries = await getTimeEntriesByProject(projectId)
+    const expenses = await getExpensesByProject(projectId)
     const now = new Date()
 
     // Reutilizamos el calculo financiero ya probado (budget, meses, story points).
@@ -136,7 +140,7 @@ export const getProjectEvmUseCase = async (
         }
     }
 
-    // --- Costo por horas registradas (el AC mas real): horas x (monthly_rate / HOURS_PER_MONTH) ---
+    // --- Costo de labor por horas registradas (el AC mas real): horas x (monthly_rate / HOURS_PER_MONTH) ---
     const loggedCostByMonth = new Map<number, number>()
     let loggedCostTotal = 0
     let loggedHours = 0
@@ -154,32 +158,47 @@ export const getProjectEvmUseCase = async (
         loggedCostByMonth.set(mi, (loggedCostByMonth.get(mi) ?? 0) + cost)
     }
 
-    // --- Resolucion del AC: horas registradas > rates de miembros > monthly_cost del proyecto ---
+    // --- Costo de labor: horas registradas > rates de miembros > monthly_cost del proyecto ---
     let acSource: AcSource | null
     let acMonthlyCost: number | null
-    let actualCost: number | null
-    let acSeriesByMonth: Map<number, number> | null
+    let laborCost: number | null
+    let laborByMonth: Map<number, number> | null
     if (ratedEntryCount > 0) {
         acSource = "logged_hours"
         acMonthlyCost = null
-        actualCost = round2(loggedCostTotal)
-        acSeriesByMonth = loggedCostByMonth
+        laborCost = round2(loggedCostTotal)
+        laborByMonth = loggedCostByMonth
     } else if (ratedMembers > 0) {
         acSource = "member_rates"
         acMonthlyCost = round2(teamMonthly)
-        actualCost = round2(acMonthlyCost * fin.elapsedMonths)
-        acSeriesByMonth = null
+        laborCost = round2(acMonthlyCost * fin.elapsedMonths)
+        laborByMonth = null
     } else if (project.monthly_cost !== null) {
         acSource = "project_monthly_cost"
         acMonthlyCost = project.monthly_cost
-        actualCost = round2(acMonthlyCost * fin.elapsedMonths)
-        acSeriesByMonth = null
+        laborCost = round2(acMonthlyCost * fin.elapsedMonths)
+        laborByMonth = null
     } else {
         acSource = null
         acMonthlyCost = null
-        actualCost = null
-        acSeriesByMonth = null
+        laborCost = null
+        laborByMonth = null
     }
+
+    // --- Gastos (no nomina): se suman al AC ---
+    const expensesByMonth = new Map<number, number>()
+    let expensesRaw = 0
+    for (const x of expenses) {
+        expensesRaw += x.amount
+        const mi = Math.max(0, monthIndexOf(project.start_date, x.date))
+        expensesByMonth.set(mi, (expensesByMonth.get(mi) ?? 0) + x.amount)
+    }
+    const expensesTotal = round2(expensesRaw)
+
+    // --- AC total = costo de labor + gastos ---
+    const actualCost = laborCost !== null || expensesTotal > 0
+        ? round2((laborCost ?? 0) + expensesTotal)
+        : null
 
     // --- Metricas EVM a la fecha de estado ---
     const plannedValue = budget !== null && plannedProgressRatio !== null
@@ -212,7 +231,9 @@ export const getProjectEvmUseCase = async (
         elapsedMonths: fin.elapsedMonths,
         totalMeasure,
         acMonthlyCost,
-        acSeriesByMonth,
+        laborByMonth,
+        expensesByMonth,
+        hasActualCost: actualCost !== null,
         tasks,
         measureOf
     })
@@ -231,13 +252,16 @@ export const getProjectEvmUseCase = async (
         notes.push("Sin story points: el avance (EV) se mide por conteo de tareas completadas.")
     }
     if (acSource === "logged_hours") {
-        notes.push(`AC calculado con horas registradas (time tracking) x (monthly_rate / ${HOURS_PER_MONTH}). Es costo real incurrido: CPI/EAC son confiables en la medida en que el equipo registre sus horas.`)
+        notes.push(`Costo de labor con horas registradas (time tracking) x (monthly_rate / ${HOURS_PER_MONTH}). Es costo real incurrido: CPI/EAC son confiables en la medida en que el equipo registre sus horas.`)
     } else if (acSource === "member_rates") {
-        notes.push("AC estimado con los rates de los miembros (monthly_rate x fte); aun no hay horas registradas. SPI es confiable, pero CPI/EAC son indicativos hasta capturar time tracking.")
+        notes.push("Costo de labor estimado con los rates de los miembros (monthly_rate x fte); aun no hay horas registradas. SPI es confiable, pero CPI/EAC son indicativos hasta capturar time tracking.")
     } else if (acSource === "project_monthly_cost") {
-        notes.push("AC estimado con el monthly_cost del proyecto (sin rates por miembro ni horas registradas). CPI/EAC son indicativos.")
+        notes.push("Costo de labor estimado con el monthly_cost del proyecto (sin rates por miembro ni horas registradas). CPI/EAC son indicativos.")
     } else {
-        notes.push("Sin horas registradas, rates de miembros ni monthly_cost: no se puede calcular AC, CPI ni EAC.")
+        notes.push("Sin horas registradas, rates de miembros ni monthly_cost: no hay costo de labor para el AC.")
+    }
+    if (expensesTotal > 0) {
+        notes.push(`El AC incluye ${expensesTotal} en gastos registrados ademas del costo de labor.`)
     }
 
     return {
@@ -253,6 +277,8 @@ export const getProjectEvmUseCase = async (
         acMonthlyCost,
         acSource,
         loggedHours: round2(loggedHours),
+        laborCost,
+        expensesTotal,
         plannedValue,
         earnedValue,
         actualCost,
@@ -280,13 +306,18 @@ interface EvmSeriesInput {
     elapsedMonths: number
     totalMeasure: number
     acMonthlyCost: number | null
-    acSeriesByMonth: Map<number, number> | null
+    laborByMonth: Map<number, number> | null
+    expensesByMonth: Map<number, number>
+    hasActualCost: boolean
     tasks: Task[]
     measureOf: (task: Task) => number
 }
 
 const buildEvmSeries = (input: EvmSeriesInput): EvmPoint[] => {
-    const { startDate, budget, plannedDurationMonths, elapsedMonths, totalMeasure, acMonthlyCost, acSeriesByMonth, tasks, measureOf } = input
+    const {
+        startDate, budget, plannedDurationMonths, elapsedMonths, totalMeasure,
+        acMonthlyCost, laborByMonth, expensesByMonth, hasActualCost, tasks, measureOf
+    } = input
 
     // Horizonte: duracion planeada; si no hay, hasta hoy.
     const horizon = plannedDurationMonths ?? elapsedMonths
@@ -307,12 +338,15 @@ const buildEvmSeries = (input: EvmSeriesInput): EvmPoint[] => {
 
     const series: EvmPoint[] = []
     let cumulativeMeasure = 0
-    let cumulativeAc = 0
+    let cumulativeLabor = 0
+    let cumulativeExpenses = 0
     for (let i = 0; i <= totalMonths; i++) {
         cumulativeMeasure += measureByMonth.get(i) ?? 0
-        if (acSeriesByMonth !== null) {
-            cumulativeAc += acSeriesByMonth.get(i) ?? 0
+        if (laborByMonth !== null) {
+            cumulativeLabor += laborByMonth.get(i) ?? 0
         }
+        cumulativeExpenses += expensesByMonth.get(i) ?? 0
+
         const monthDate = new Date(Date.UTC(startYear, startMonth + i, 1))
         const isPast = i <= currentMonthIndex
 
@@ -322,13 +356,16 @@ const buildEvmSeries = (input: EvmSeriesInput): EvmPoint[] => {
         const ev = isPast && budget !== null && totalMeasure > 0
             ? round2(budget * (cumulativeMeasure / totalMeasure))
             : null
+
         let ac: number | null = null
-        if (isPast) {
-            if (acSeriesByMonth !== null) {
-                ac = round2(cumulativeAc)
+        if (isPast && hasActualCost) {
+            let value = cumulativeExpenses
+            if (laborByMonth !== null) {
+                value += cumulativeLabor
             } else if (acMonthlyCost !== null) {
-                ac = round2(acMonthlyCost * i)
+                value += acMonthlyCost * i
             }
+            ac = round2(value)
         }
 
         series.push({ month: formatMonth(monthDate), pv, ev, ac })
