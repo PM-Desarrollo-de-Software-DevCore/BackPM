@@ -4,12 +4,12 @@ import {
     validateProjectIdParam,
     validateProjectAndUserParams,
     validateAddMemberBody,
-    validateUpdateMemberRoleBody
+    validateUpdateMemberBody
 } from "../middlewares/validateMember"
 import {
     addMemberController,
     getProjectMembersController,
-    updateMemberRoleController,
+    updateMemberController,
     removeMemberController
 } from "../controllers/memberController"
 
@@ -43,7 +43,17 @@ const router = Router()
  *                 format: uuid
  *               role:
  *                 type: string
- *                 enum: [project_manager, scrum_master, developer]
+ *                 enum: [project_manager, scrum_master, developer, team_lead]
+ *               fte:
+ *                 type: number
+ *                 nullable: true
+ *                 description: Capacidad estimada (0 < fte <= 1)
+ *                 example: 0.5
+ *               monthly_rate:
+ *                 type: number
+ *                 nullable: true
+ *                 description: Costo mensual del miembro (solo visible para admin/PM)
+ *                 example: 4000
  *     responses:
  *       201:
  *         description: Miembro agregado
@@ -87,7 +97,7 @@ router.get(
  * @swagger
  * /projects/{projectId}/members/{userId}:
  *   patch:
- *     summary: Cambiar rol de miembro
+ *     summary: Actualizar miembro (rol, FTE, rate)
  *     tags: [Members]
  *     security:
  *       - bearerAuth: []
@@ -110,21 +120,28 @@ router.get(
  *         application/json:
  *           schema:
  *             type: object
- *             required: [role]
  *             properties:
  *               role:
  *                 type: string
- *                 enum: [project_manager, scrum_master, developer]
+ *                 enum: [project_manager, scrum_master, developer, team_lead]
+ *               fte:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 0.5
+ *               monthly_rate:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 4000
  *     responses:
  *       200:
- *         description: Rol actualizado
+ *         description: Miembro actualizado
  */
 router.patch(
     "/:projectId/members/:userId",
     requireAuth,
     validateProjectAndUserParams,
-    validateUpdateMemberRoleBody,
-    updateMemberRoleController
+    validateUpdateMemberBody,
+    updateMemberController
 )
 /**
  * @swagger

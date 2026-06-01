@@ -4,7 +4,7 @@ import { GlobalRole } from "../entities/User"
 import { ProjectRole } from "../entities/MemberProject"
 import { addMemberToProjectUseCase } from "../use-cases/memberProjects/AddMemberToProject"
 import { getProjectMembersUseCase } from "../use-cases/memberProjects/GetProjectMembers"
-import { updateMemberRoleUseCase } from "../use-cases/memberProjects/UpdateMemberRole"
+import { updateMemberUseCase } from "../use-cases/memberProjects/UpdateMemberRole"
 import { removeMemberFromProjectUseCase } from "../use-cases/memberProjects/RemoveMemberFromProject"
 import { getCurrentUser } from "../use-cases/auth/GetCurrentUser"
 
@@ -18,11 +18,15 @@ export const addMemberController = async (req: AuthenticatedRequest, res: Respon
         const projectId = req.params.projectId as string
         const userId = req.body.userId as string
         const role = req.body.role as ProjectRole
+        const fte = (req.body.fte ?? null) as number | null
+        const monthlyRate = (req.body.monthly_rate ?? null) as number | null
 
         const result = await addMemberToProjectUseCase(
             projectId,
             userId,
             role,
+            fte,
+            monthlyRate,
             req.userId,
             user.role as GlobalRole
         )
@@ -39,8 +43,9 @@ export const getProjectMembersController = async (req: AuthenticatedRequest, res
             return res.status(401).json({ success: false, message: "Token invalido" })
         }
 
+        const user = await getCurrentUser(req.userId)
         const projectId = req.params.projectId as string
-        const result = await getProjectMembersUseCase(projectId, req.userId)
+        const result = await getProjectMembersUseCase(projectId, req.userId, user.role as GlobalRole)
 
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
@@ -48,7 +53,7 @@ export const getProjectMembersController = async (req: AuthenticatedRequest, res
     }
 }
 
-export const updateMemberRoleController = async (req: AuthenticatedRequest, res: Response) => {
+export const updateMemberController = async (req: AuthenticatedRequest, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ success: false, message: "Token invalido" })
@@ -57,13 +62,12 @@ export const updateMemberRoleController = async (req: AuthenticatedRequest, res:
         const user = await getCurrentUser(req.userId)
         const projectId = req.params.projectId as string
         const userId = req.params.userId as string
-        const role = req.body.role as ProjectRole
 
-        const result = await updateMemberRoleUseCase(
+        // req.body ya viene validado por zod (solo role/fte/monthly_rate provistos).
+        const result = await updateMemberUseCase(
             projectId,
             userId,
-            role,
-            req.userId,
+            req.body,
             user.role as GlobalRole
         )
 

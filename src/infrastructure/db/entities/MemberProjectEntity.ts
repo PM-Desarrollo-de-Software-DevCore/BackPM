@@ -27,6 +27,14 @@ export class MemberProjectEntity {
     @Column({ type: "varchar", length: 50, default: ProjectRole.DEVELOPER })
     role: ProjectRole
 
+    // Capacidad estimada (full-time equivalent), p.ej. 1 = tiempo completo, 0.5 = medio tiempo.
+    @Column({ type: "float", nullable: true })
+    fte: number | null
+
+    // Costo mensual del miembro en este proyecto (dato sensible: solo lo ve admin/PM).
+    @Column({ type: "float", nullable: true })
+    monthly_rate: number | null
+
     @CreateDateColumn()
     createdAt: Date
 }
