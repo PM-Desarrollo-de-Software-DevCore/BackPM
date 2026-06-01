@@ -10,7 +10,8 @@ import {
     getProjectReportController,
     getProjectVelocityController,
     getProjectStoryPointsController,
-    getProjectFinancialSummaryController
+    getProjectFinancialSummaryController,
+    getProjectEvmController
 } from "../controllers/projectController"
 
 const router = Router()
@@ -203,6 +204,35 @@ router.get("/:projectId/story-points", requireAuth, getProjectStoryPointsControl
  *         description: Proyecto no encontrado o sin acceso
  */
 router.get("/:projectId/financial-summary", requireAuth, getProjectFinancialSummaryController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/evm:
+ *   get:
+ *     summary: Earned Value Management del proyecto (PV, EV, AC, CPI, SPI, EAC)
+ *     description: >
+ *       Metricas EVM a la fecha de estado mas una serie mensual (S-curve) de PV/EV/AC.
+ *       EV se basa en story points (o conteo de tareas si no hay SP). AC se estima con los
+ *       rates de los miembros (monthly_rate x fte) o, en su defecto, el monthly_cost del proyecto:
+ *       el SPI es confiable, pero CPI/EAC son indicativos hasta tener time tracking.
+ *       Los campos se devuelven null cuando faltan los datos de entrada.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Metricas EVM, indices, serie S-curve y notas de supuestos
+ *       404:
+ *         description: Proyecto no encontrado o sin acceso
+ */
+router.get("/:projectId/evm", requireAuth, getProjectEvmController)
 
 /**
  * @swagger
