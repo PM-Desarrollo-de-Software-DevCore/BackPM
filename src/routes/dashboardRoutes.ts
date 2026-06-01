@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -339,5 +339,25 @@ router.get("/user-tasks", requireAuth, getUserTasksController)
  *         description: No autorizado
  */
 router.get("/weekly-progress", requireAuth, getWeeklyProgressController)
+
+/**
+ * @swagger
+ * /dashboard/financial-portfolio:
+ *   get:
+ *     summary: Portafolio financiero (agregado de los proyectos del usuario)
+ *     description: |
+ *       Agrega los indicadores financieros de todos los proyectos a los que el usuario tiene acceso
+ *       (creador o miembro): presupuesto, gasto estimado, runway y proyectos en riesgo de sobrecosto.
+ *       El gasto es estimado (monthly_cost x meses transcurridos), no costo real. Campos null cuando faltan datos.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Resumen del portafolio y desglose por proyecto
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/financial-portfolio", requireAuth, getFinancialPortfolioController)
 
 export default router
