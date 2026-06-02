@@ -13,5 +13,10 @@ export const getCurrentUser = async (userId: string) => {
         name: user.name,
         lastname: user.lastname,
         role: user.globalRole,
+        skill: user.skill ?? null,
+        area: user.area ?? null,
+        phoneNumber: user.phoneNumber ?? null,
+        profileImageUrl: user.profileImageUrl ?? null,
+        specialty: user.specialty ?? null,
     }
 }
