@@ -55,7 +55,8 @@ export const createUserController = async (req: AuthenticatedRequest, res: Respo
         })
       }
     }
-    res.status(201).json({ success: true, data: created })
+    // Reconsultamos para no devolver el hash de password de la entidad recien guardada
+    res.status(201).json({ success: true, data: await findUserById(created.id) })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
   }

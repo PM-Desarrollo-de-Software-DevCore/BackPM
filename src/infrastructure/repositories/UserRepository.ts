@@ -8,7 +8,11 @@ const repo = AppDataSource.getRepository(UserEntity)
 
 // Hacer una consulta 
 export const findUserByEmail = async (email: string): Promise<User | null> => {
-    return await repo.findOne({ where: { email } })     
+    // password es select:false: lo agregamos explicito para que el login pueda compararlo
+    return await repo.createQueryBuilder("u")
+        .where("u.email = :email", { email })
+        .addSelect("u.password")
+        .getOne()
 }
 
 export const findUserById = async (id: string): Promise<User | null> => {
@@ -33,7 +37,11 @@ export const deleteUser = async (id: string): Promise<void> => {
 }
 
 export const findUserByResetToken = async (token: string): Promise<User | null> => {
-    return await repo.findOne({ where: { resetToken: token } })
+    // resetToken/expiry son select:false: se agregan para validar el flujo de reseteo
+    return await repo.createQueryBuilder("u")
+        .where("u.resetToken = :token", { token })
+        .addSelect(["u.resetToken", "u.resetTokenExpiry"])
+        .getOne()
 }
 
 export const updateResetToken = async (userId: string, token: string, expiry: Date): Promise<void> => {
