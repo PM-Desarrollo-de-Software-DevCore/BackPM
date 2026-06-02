@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import { findAllUsers, saveUser, updateUser, deleteUser, findUserById } from "../infrastructure/repositories/UserRepository"
 import { uploadProfileImage, deleteProfileImage, uploadCV, deleteCV, getCVSignedUrl } from "../infrastructure/cloudinary/CloudinaryClient"
-import { Specialty } from "../entities/User"
+import { Specialty, User } from "../entities/User"
 import { AuthenticatedRequest } from "../middlewares/requireAuth"
 import { getCurrentUser } from "../use-cases/auth/GetCurrentUser"
 import { notifyAdminUserChange } from "../infrastructure/services/notificationService"
@@ -18,10 +18,32 @@ const validateSpecialty = (value: unknown): { ok: true } | { ok: false; message:
   return { ok: true }
 }
 
-export const listUsersController = async (req: Request, res: Response) => {
+// Proyeccion "directorio" para no-admins: sin PII (phoneNumber, cvUrl).
+// Las credenciales (password/resetToken/resetTokenExpiry) ya van filtradas por select:false.
+const toDirectoryUser = (u: User) => ({
+  id: u.id,
+  email: u.email,
+  name: u.name,
+  lastname: u.lastname,
+  globalRole: u.globalRole,
+  createdAt: u.createdAt,
+  skill: u.skill ?? null,
+  area: u.area ?? null,
+  profileImageUrl: u.profileImageUrl ?? null,
+  specialty: u.specialty ?? null,
+})
+
+export const listUsersController = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const users = await findAllUsers()
-    res.status(200).json({ success: true, data: users })
+    let isAdmin = false
+    if (req.userId) {
+      const me = await getCurrentUser(req.userId)
+      isAdmin = me.role === "admin"
+    }
+    // Admin ve el listado completo (sin credenciales); no-admin solo la proyeccion de directorio.
+    const data = isAdmin ? users : users.map(toDirectoryUser)
+    res.status(200).json({ success: true, data })
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message })
   }
