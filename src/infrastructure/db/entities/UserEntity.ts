@@ -14,7 +14,8 @@ export class UserEntity {
     @Column({ type: "varchar", unique: true })
     email: string
 
-    @Column()
+    // select:false -> nunca se devuelve por defecto (login lo selecciona explicito)
+    @Column({ select: false })
     password: string
 
     @Column()
@@ -29,10 +30,11 @@ export class UserEntity {
     @CreateDateColumn()
     createdAt: Date
 
-    @Column({ type: "varchar", length: 255, nullable: true })
+    // select:false -> sensibles; solo el flujo de reseteo los selecciona explicito
+    @Column({ type: "varchar", length: 255, nullable: true, select: false })
     resetToken: string | null
 
-    @Column({ type: "datetime2", nullable: true })
+    @Column({ type: "datetime2", nullable: true, select: false })
     resetTokenExpiry: Date | null
 
     @Column({ type: "varchar", length: 100, nullable: true })
