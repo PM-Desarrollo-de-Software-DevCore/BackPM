@@ -10,7 +10,8 @@ import {
     addMemberController,
     getProjectMembersController,
     updateMemberController,
-    removeMemberController
+    removeMemberController,
+    syncMembersController
 } from "../controllers/memberController"
 
 const router = Router()
@@ -66,6 +67,64 @@ router.post(
     validateProjectIdParam,
     validateAddMemberBody,
     addMemberController
+)
+
+/**
+ * @swagger
+ * /projects/{projectId}/members/sync:
+ *   post:
+ *     summary: Sincronizar miembros del proyecto en una sola transacción atómica
+ *     description: |
+ *       Aplica altas, cambios de rol y bajas de miembros en UNA transacción (todo o nada).
+ *       Reemplaza el fan-out de escrituras (un request por miembro). Solo admin global.
+ *       Roles únicos (project_manager, team_lead) se validan sobre el roster final.
+ *     tags: [Members]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               add:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [userId, role]
+ *                   properties:
+ *                     userId: { type: string, format: uuid }
+ *                     role: { type: string, enum: [project_manager, scrum_master, developer, team_lead] }
+ *               update:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [userId, role]
+ *                   properties:
+ *                     userId: { type: string, format: uuid }
+ *                     role: { type: string, enum: [project_manager, scrum_master, developer, team_lead] }
+ *               remove:
+ *                 type: array
+ *                 items: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Miembros sincronizados
+ *       400:
+ *         description: Error de validación o permisos (transacción revertida)
+ */
+router.post(
+    "/:projectId/members/sync",
+    requireAuth,
+    validateProjectIdParam,
+    syncMembersController
 )
 /**
  * @swagger
