@@ -6,6 +6,7 @@ import { addMemberToProjectUseCase } from "../use-cases/memberProjects/AddMember
 import { getProjectMembersUseCase } from "../use-cases/memberProjects/GetProjectMembers"
 import { updateMemberUseCase } from "../use-cases/memberProjects/UpdateMemberRole"
 import { removeMemberFromProjectUseCase } from "../use-cases/memberProjects/RemoveMemberFromProject"
+import { syncProjectMembersUseCase } from "../use-cases/memberProjects/SyncProjectMembers"
 import { getCurrentUser } from "../use-cases/auth/GetCurrentUser"
 
 export const addMemberController = async (req: AuthenticatedRequest, res: Response) => {
@@ -92,6 +93,33 @@ export const removeMemberController = async (req: AuthenticatedRequest, res: Res
             userId,
             req.userId,
             user.role as GlobalRole
+        )
+
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const syncMembersController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const user = await getCurrentUser(req.userId)
+        const projectId = req.params.projectId as string
+        const body = (req.body ?? {}) as {
+            add?: any[]
+            update?: any[]
+            remove?: string[]
+        }
+
+        const result = await syncProjectMembersUseCase(
+            projectId,
+            req.userId,
+            user.role as GlobalRole,
+            { add: body.add ?? [], update: body.update ?? [], remove: body.remove ?? [] }
         )
 
         return res.status(200).json({ success: true, data: result })
