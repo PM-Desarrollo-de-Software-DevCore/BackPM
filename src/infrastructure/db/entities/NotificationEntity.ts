@@ -1,7 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from "typeorm"
 import { NotificationCategory } from "../../../entities/Notification"
 
 @Entity("notifications")
+// Indices ya existentes en la BD (migracion 1780). Declarados aqui para que el
+// esquema declarado coincida y migration:generate no los dropee.
+@Index("IDX_notifications_recipient_created", ["recipientUserId", "createdAt"])
+@Index("IDX_notifications_recipient_read", ["recipientUserId", "readAt"])
+@Index("IDX_notifications_dedupeKey", ["dedupeKey"])
 export class NotificationEntity {
     @PrimaryGeneratedColumn("uuid")
     id_notification: string
