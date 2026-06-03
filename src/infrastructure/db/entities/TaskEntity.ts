@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, Check } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, Check } from "typeorm"
 import { ProjectEntity } from "./ProjectEntity"
 import { SprintEntity } from "./SprintEntity"
 import { UserEntity } from "./UserEntity"
@@ -48,6 +48,7 @@ export class TaskEntity {
     @JoinColumn({ name: "id_project" })
     project: ProjectEntity
 
+    @Index("IX_task_id_project")
     @Column("uuid")
     id_project: string
 
@@ -56,6 +57,7 @@ export class TaskEntity {
     @JoinColumn({ name: "id_sprint" })
     sprint: SprintEntity | null
 
+    @Index("IX_task_id_sprint")
     @Column("uuid", { nullable: true })
     id_sprint: string | null
 
@@ -72,6 +74,7 @@ export class TaskEntity {
     @JoinColumn({ name: "assignedTo" })
     assignedTo_id: UserEntity | null
 
+    @Index("IX_task_assignedTo")
     @Column("uuid", { nullable: true })
     assignedTo: string | null
 

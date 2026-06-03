@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { ProjectEntity } from "./ProjectEntity"
 import { ProjectRole } from "../../../entities/MemberProject"
@@ -13,6 +13,7 @@ export class MemberProjectEntity {
     @JoinColumn({ name: "id_user" })
     user: UserEntity
 
+    @Index("IX_member_project_id_user")
     @Column("uuid")
     id_user: string
 
@@ -21,6 +22,7 @@ export class MemberProjectEntity {
     @JoinColumn({ name: "id_project" })
     project: ProjectEntity
 
+    @Index("IX_member_project_id_project")
     @Column("uuid")
     id_project: string
 

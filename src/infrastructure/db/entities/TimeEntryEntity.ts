@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { TaskEntity } from "./TaskEntity"
 
@@ -12,6 +12,7 @@ export class TimeEntryEntity {
     @JoinColumn({ name: "id_task" })
     task: TaskEntity
 
+    @Index("IX_time_entry_id_task")
     @Column("uuid")
     id_task: string
 
@@ -20,6 +21,7 @@ export class TimeEntryEntity {
     @JoinColumn({ name: "id_user" })
     user: UserEntity
 
+    @Index("IX_time_entry_id_user")
     @Column("uuid")
     id_user: string
 
