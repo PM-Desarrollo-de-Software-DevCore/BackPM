@@ -1,3 +1,4 @@
+import { In } from "typeorm"
 import { AppDataSource } from "../db/DataSource"
 import { SprintEntity } from "../db/entities/SprintEntity"
 import { Sprint } from "../../entities/Sprint"
@@ -15,6 +16,12 @@ export const getSprintById = async (id: string): Promise<Sprint | null> => {
 
 export const getSprintsByProject = async (projectId: string): Promise<Sprint[]> => {
     return await repo.find({ where: { id_project: projectId }, order: { createdAt: "DESC" } })
+}
+
+// Bulk: todos los sprints de varios proyectos en UNA query (evita N+1 en milestones-overview)
+export const getSprintsByProjects = async (projectIds: string[]): Promise<Sprint[]> => {
+    if (projectIds.length === 0) return []
+    return await repo.find({ where: { id_project: In(projectIds) }, order: { createdAt: "DESC" } })
 }
 
 export const updateSprint = async (id: string, data: Partial<Omit<Sprint, "id_sprint" | "createdAt">>): Promise<Sprint | null> => {

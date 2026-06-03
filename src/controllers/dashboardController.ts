@@ -5,6 +5,7 @@ import { getTasksStatsUseCase } from "../use-cases/dashboard/GetTasksStats"
 import { getUserTasksUseCase } from "../use-cases/dashboard/GetUserTasks"
 import { getWeeklyProgressUseCase } from "../use-cases/dashboard/GetWeeklyProgress"
 import { getFinancialPortfolioUseCase } from "../use-cases/dashboard/GetFinancialPortfolio"
+import { getMilestonesOverviewUseCase } from "../use-cases/dashboard/GetMilestonesOverview"
 
 export const getProjectsStatsController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -73,6 +74,19 @@ export const getFinancialPortfolioController = async (req: AuthenticatedRequest,
         }
 
         const result = await getFinancialPortfolioUseCase(req.userId)
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getMilestonesOverviewController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const result = await getMilestonesOverviewUseCase(req.userId)
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
