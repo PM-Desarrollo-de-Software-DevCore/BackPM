@@ -4,13 +4,14 @@ name: Keep backend warm
 # cold start (decenas de segundos) que el usuario sufre al abrir la app. Este job
 # pinga el endpoint /health periodicamente para mantenerlo despierto.
 #
-# Nota de costo: el plan free de Render da ~750 horas/mes; mantenerlo siempre
-# despierto consume casi todas. Para conservar horas, puedes acotar el cron a tu
-# horario activo, p.ej.: "*/13 13-4 * * 1-5" (lun-vie, ~8am-10pm CST / UTC-6).
-# En repos PUBLICOS los minutos de GitHub Actions son gratis.
+# Nota de costo: el plan free de Render da ~750 horas/mes; mantenerlo despierto
+# 24/7 consume casi todas. Por eso se acota a horario activo (Mexico, UTC-6):
+# cada 13 min de 7:00am a 11:59pm CST (= 13:00-05:59 UTC). Duerme de medianoche
+# a 7am CST -> ~17h/dia (~510h/mes), holgado bajo el limite. Para volver a 24/7
+# usa "*/13 * * * *". En repos PUBLICOS los minutos de GitHub Actions son gratis.
 on:
   schedule:
-    - cron: "*/13 * * * *" # cada 13 minutos
+    - cron: "*/13 0-5,13-23 * * *" # cada 13 min, 7am-medianoche CST (13:00-05:59 UTC)
   workflow_dispatch: {}
 
 jobs:
