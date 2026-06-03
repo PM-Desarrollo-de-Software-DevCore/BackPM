@@ -1,7 +1,7 @@
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { isMemberProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getSprintsByProject } from "../../infrastructure/repositories/SprintRepository"
-import { getTasksBySprint } from "../../infrastructure/repositories/TaskRepository"
+import { getTasksBySprints } from "../../infrastructure/repositories/TaskRepository"
 import { Task, TaskStatus } from "../../entities/Task"
 import { SprintStatus } from "../../entities/Sprint"
 
@@ -40,14 +40,18 @@ export const getProjectVelocityUseCase = async (
 
     const sprints = await getSprintsByProject(projectId)
 
-    const sprintsWithTasks = await Promise.all(
-        sprints.map(async (sprint) => ({
-            sprint,
-            tasks: await getTasksBySprint(sprint.id_sprint)
-        }))
-    )
+    // Una sola query para las tareas de TODOS los sprints (antes: 1 query por sprint => N+1).
+    const allTasks = await getTasksBySprints(sprints.map((sprint) => sprint.id_sprint))
+    const tasksBySprint = new Map<string, Task[]>()
+    for (const task of allTasks) {
+        if (!task.id_sprint) continue
+        const list = tasksBySprint.get(task.id_sprint)
+        if (list) list.push(task)
+        else tasksBySprint.set(task.id_sprint, [task])
+    }
 
-    const items: SprintVelocityItem[] = sprintsWithTasks.map(({ sprint, tasks }) => {
+    const items: SprintVelocityItem[] = sprints.map((sprint) => {
+        const tasks = tasksBySprint.get(sprint.id_sprint) ?? []
         const completedPoints = tasks
             .filter((t) => t.status === TaskStatus.COMPLETED)
             .reduce((acc, t) => acc + pointsOf(t), 0)
