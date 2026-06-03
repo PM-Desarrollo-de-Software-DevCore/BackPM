@@ -8,7 +8,8 @@ import {
     updateTaskController,
     updateTaskStoryPointsController,
     updateTaskStatusController,
-    deleteTaskController
+    deleteTaskController,
+    getCompletedTodayCountsController
 } from "../controllers/taskController"
 
 /**
@@ -161,6 +162,49 @@ sprintTaskRouter.get("/:sprintId/tasks", requireAuth, getTasksBySprintController
  *       404:
  *         description: Tarea no encontrada
  */
+/**
+ * @swagger
+ * /tasks/completed-today:
+ *   post:
+ *     summary: Conteo de tareas completadas hoy por usuario (para el badge del leaderboard)
+ *     description: |
+ *       Recibe { userIds: string[] } y devuelve, por cada usuario, cuántas tareas
+ *       completó hoy. Una sola query (assignedTo IN ...) en vez de un request por usuario.
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [userIds]
+ *             properties:
+ *               userIds:
+ *                 type: array
+ *                 items: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Conteos por usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       userId: { type: string, format: uuid }
+ *                       count: { type: integer }
+ *       401:
+ *         description: No autorizado
+ */
+taskRouter.post("/completed-today", requireAuth, getCompletedTodayCountsController)
+
 taskRouter.get("/:taskId", requireAuth, getTaskByIdController)
 
 /**
