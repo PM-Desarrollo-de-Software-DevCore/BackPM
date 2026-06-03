@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -359,5 +359,84 @@ router.get("/weekly-progress", requireAuth, getWeeklyProgressController)
  *         description: Token invalido o no proporcionado
  */
 router.get("/financial-portfolio", requireAuth, getFinancialPortfolioController)
+
+/**
+ * @swagger
+ * /dashboard/milestones-overview:
+ *   get:
+ *     summary: Datos agregados para la vista de Milestones en UNA sola respuesta
+ *     description: |
+ *       Devuelve en una sola llamada todo lo que la pagina de milestones necesitaba con
+ *       3 + 2*N requests: proyectos del usuario, sus estadisticas (projectStats), los usuarios
+ *       referenciados, y los members y sprints de todos los proyectos (queries bulk con IN).
+ *       Proyeccion segura: sin monthly_rate/fte en members ni campos financieros en projects.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Overview agregado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     projects:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id_project: { type: string, format: uuid }
+ *                           name: { type: string }
+ *                           description: { type: string, nullable: true }
+ *                           start_date: { type: string, format: date-time }
+ *                           end_date: { type: string, format: date-time, nullable: true }
+ *                           priority: { type: string, enum: [high, medium, low] }
+ *                           status: { type: string, enum: [planning, in_progress, completed] }
+ *                           createdBy: { type: string, format: uuid }
+ *                           createdAt: { type: string, format: date-time }
+ *                     projectStats:
+ *                       type: array
+ *                       description: Igual que projectsChart de /dashboard/projects-stats
+ *                       items: { type: object }
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id: { type: string, format: uuid }
+ *                           email: { type: string }
+ *                           name: { type: string }
+ *                           lastname: { type: string }
+ *                           profileImageUrl: { type: string, nullable: true }
+ *                     members:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id_mp: { type: string, format: uuid }
+ *                           id_user: { type: string, format: uuid }
+ *                           id_project: { type: string, format: uuid }
+ *                           role: { type: string, enum: [project_manager, scrum_master, developer, team_lead] }
+ *                     sprints:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id_sprint: { type: string, format: uuid }
+ *                           name: { type: string }
+ *                           start_date: { type: string, format: date-time }
+ *                           end_date: { type: string, format: date-time }
+ *                           status: { type: string, enum: [planned, active, finished] }
+ *                           id_project: { type: string, format: uuid }
+ *                           createdAt: { type: string, format: date-time }
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/milestones-overview", requireAuth, getMilestonesOverviewController)
 
 export default router

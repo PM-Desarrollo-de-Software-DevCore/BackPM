@@ -1,3 +1,4 @@
+import { In } from "typeorm"
 import { AppDataSource } from "../db/DataSource"
 import { MemberProjectEntity } from "../db/entities/MemberProjectEntity"
 import { MemberProject, ProjectRole } from "../../entities/MemberProject"
@@ -45,6 +46,12 @@ export const addMemberToProject = async (
 
 export const getProjectMembers = async (projectId: string): Promise<MemberProject[]> => {
     return await repo.find({ where: { id_project: projectId } })
+}
+
+// Bulk: todos los miembros de varios proyectos en UNA query (evita N+1 en milestones-overview)
+export const getMembersByProjects = async (projectIds: string[]): Promise<MemberProject[]> => {
+    if (projectIds.length === 0) return []
+    return await repo.find({ where: { id_project: In(projectIds) } })
 }
 
 export const updateMemberRole = async (userId: string, projectId: string, newRole: ProjectRole): Promise<MemberProject | null> => {
