@@ -16,6 +16,8 @@ export interface ProjectChartItem {
     inProgressTasks: number
     pendingTasks: number
     completionPercentage: number
+    plannedPercentage: number
+    scheduleVariance: number
     isOverdue: boolean
     daysRemaining: number | null
 }
@@ -60,6 +62,13 @@ const buildChartItem = (project: Project, tasks: Task[], today: Date): ProjectCh
         ? null
         : Math.ceil((endDate.getTime() - today.getTime()) / MS_PER_DAY)
 
+    const plannedTasksDue = tasks.filter(
+    (t) => t.end_date !== null && t.end_date.getTime() <= today.getTime()
+        ).length
+
+    const plannedPercentage = totalTasks === 0 ? 0 : Math.round((plannedTasksDue / totalTasks) * 100)
+    const scheduleVariance = completionPercentage - plannedPercentage
+
     return {
         id_project: project.id_project,
         name: project.name,
@@ -72,6 +81,8 @@ const buildChartItem = (project: Project, tasks: Task[], today: Date): ProjectCh
         inProgressTasks,
         pendingTasks,
         completionPercentage,
+        plannedPercentage,
+        scheduleVariance,
         isOverdue,
         daysRemaining
     }
