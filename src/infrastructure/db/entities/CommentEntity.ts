@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { TaskEntity } from "./TaskEntity"
 
@@ -23,6 +23,7 @@ export class CommentEntity {
     @JoinColumn({ name: "id_task" })
     task: TaskEntity
 
+    @Index("IX_comment_id_task")
     @Column("uuid")
     id_task: string
 

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { ProjectEntity } from "./ProjectEntity"
 import { UserEntity } from "./UserEntity"
 
@@ -29,6 +29,7 @@ export class MilestoneEntity {
     @JoinColumn({ name: "id_project" })
     project: ProjectEntity
 
+    @Index("IX_milestones_id_project")
     @Column("uuid")
     id_project: string
 

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Unique } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn, CreateDateColumn, Unique } from "typeorm"
 import { UserEntity } from "./UserEntity"
 
 @Entity("user_technologies")
@@ -11,6 +11,7 @@ export class UserTechnologyEntity {
     @JoinColumn({ name: "id_user" })
     user: UserEntity
 
+    @Index("IX_user_technologies_id_user")
     @Column("uuid")
     id_user: string
 

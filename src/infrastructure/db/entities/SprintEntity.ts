@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from "typeorm"
 import { ProjectEntity } from "./ProjectEntity"
 import { TaskEntity } from "./TaskEntity"
 import { SprintStatus } from "../../../entities/Sprint"
@@ -28,6 +28,7 @@ export class SprintEntity {
     @JoinColumn({ name: "id_project" })
     project: ProjectEntity
 
+    @Index("IX_sprints_id_project")
     @Column("uuid")
     id_project: string
 
