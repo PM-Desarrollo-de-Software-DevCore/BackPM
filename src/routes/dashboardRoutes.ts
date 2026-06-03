@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController, getSearchIndexController, getProjectsMembersController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController, getSearchIndexController, getProjectsMembersController, getWeeklyVelocityController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -478,5 +478,53 @@ router.get("/search-index", requireAuth, getSearchIndexController)
  *         description: Token invalido o no proporcionado
  */
 router.get("/projects-members", requireAuth, getProjectsMembersController)
+
+/**
+ * @swagger
+ * /dashboard/weekly-velocity:
+ *   get:
+ *     summary: Serie de velocidad semanal (tareas completadas por semana) en una respuesta
+ *     description: |
+ *       Devuelve la serie completa de las últimas N semanas (default 5) en UNA query de rango,
+ *       reemplazando el 1+N que hacía getWeeklyVelocitySeries en el frontend (una llamada a
+ *       /dashboard/weekly-progress por semana). Si se pasa projectId, restringe a ese proyecto;
+ *       si se omite, agrega todos los proyectos accesibles del usuario.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: false
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: weeks
+ *         required: false
+ *         schema: { type: integer, minimum: 1, maximum: 52, default: 5 }
+ *     responses:
+ *       200:
+ *         description: Serie semanal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     series:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           weekStart: { type: string, format: date-time }
+ *                           totalCompleted: { type: integer }
+ *       400:
+ *         description: Parametros invalidos
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/weekly-velocity", requireAuth, getWeeklyVelocityController)
 
 export default router
