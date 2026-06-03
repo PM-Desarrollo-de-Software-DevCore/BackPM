@@ -1,3 +1,4 @@
+import { In } from "typeorm"
 import { AppDataSource } from "../db/DataSource"
 import { TaskEntity } from "../db/entities/TaskEntity"
 import { Task, TaskPriority, TaskStatus } from "../../entities/Task"
@@ -15,6 +16,14 @@ export const getTaskById = async (id: string): Promise<Task | null> => {
 
 export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
     return await repo.find({ where: { id_project: projectId }, order: { createdAt: "DESC" } })
+}
+
+// Variante en lote: trae en UNA sola query las tareas de varios proyectos
+// (evita el N+1 de llamar getTasksByProject por cada proyecto en los dashboards).
+// Mismo orden (createdAt DESC) para que el agrupado en memoria sea equivalente.
+export const getTasksByProjects = async (projectIds: string[]): Promise<Task[]> => {
+    if (projectIds.length === 0) return []
+    return await repo.find({ where: { id_project: In(projectIds) }, order: { createdAt: "DESC" } })
 }
 
 export const getNextTaskNumberForProject = async (projectId: string): Promise<number> => {

@@ -1,5 +1,6 @@
 import { getProjectsByUser } from "../../infrastructure/repositories/ProjectRepository"
-import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
+import { getTasksByProjects } from "../../infrastructure/repositories/TaskRepository"
+import { groupTasksByProject } from "./groupTasksByProject"
 import { computeProjectFinancialSummary } from "../projects/GetProjectFinancialSummary"
 import { ProjectStatus } from "../../entities/Project"
 
@@ -42,11 +43,14 @@ const isAtRisk = (projectedOverBudget: number | null, budgetCoversPlannedEnd: bo
 export const getFinancialPortfolioUseCase = async (userId: string): Promise<FinancialPortfolioResponse> => {
     const projects = await getProjectsByUser(userId)
 
-    const items: PortfolioProjectItem[] = await Promise.all(
-        projects.map(async (project) => {
-            const tasks = await getTasksByProject(project.id_project)
-            const fin = computeProjectFinancialSummary(project, tasks)
-            return {
+    const tasksByProjectId = groupTasksByProject(
+        await getTasksByProjects(projects.map((p) => p.id_project))
+    )
+
+    const items: PortfolioProjectItem[] = projects.map((project) => {
+        const tasks = tasksByProjectId.get(project.id_project) ?? []
+        const fin = computeProjectFinancialSummary(project, tasks)
+        return {
                 id_project: project.id_project,
                 name: project.name,
                 status: project.status,
@@ -59,9 +63,8 @@ export const getFinancialPortfolioUseCase = async (userId: string): Promise<Fina
                 budgetCoversPlannedEnd: fin.budgetCoversPlannedEnd,
                 projectedOverBudget: fin.projectedOverBudget,
                 atRisk: isAtRisk(fin.projectedOverBudget, fin.budgetCoversPlannedEnd)
-            }
-        })
-    )
+        }
+    })
 
     const sum = (selector: (item: PortfolioProjectItem) => number | null): number =>
         round2(items.reduce((acc, item) => acc + (selector(item) ?? 0), 0))
