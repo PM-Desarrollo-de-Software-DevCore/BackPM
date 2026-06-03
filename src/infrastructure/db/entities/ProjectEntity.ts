@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, JoinColumn, Check } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { SprintEntity } from "./SprintEntity"
 import { MemberProjectEntity } from "./MemberProjectEntity"
@@ -6,6 +6,10 @@ import { TaskEntity } from "./TaskEntity"
 import { ProjectStatus, ProjectPriority, ProjectMethodology, ProjectBillingModel } from "../../../entities/Project"
 
 @Entity("projects")
+// CHECK constraints ya existentes en la BD (migracion 1781). Declarados aqui para
+// que migration:generate no los dropee.
+@Check("CHK_projects_methodology", `"methodology" IN ('scrum', 'kanban')`)
+@Check("CHK_projects_billing_model", `"billing_model" IN ('fixed_price', 'time_and_materials', 'retainer') OR "billing_model" IS NULL`)
 export class ProjectEntity {
     @PrimaryGeneratedColumn("uuid")
     id_project: string
