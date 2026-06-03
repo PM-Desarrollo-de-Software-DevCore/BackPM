@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController, getSearchIndexController, getProjectsMembersController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -438,5 +438,45 @@ router.get("/financial-portfolio", requireAuth, getFinancialPortfolioController)
  *         description: Token invalido o no proporcionado
  */
 router.get("/milestones-overview", requireAuth, getMilestonesOverviewController)
+
+/**
+ * @swagger
+ * /dashboard/search-index:
+ *   get:
+ *     summary: Índice del buscador global (sprints + tasks de todos los proyectos del usuario)
+ *     description: |
+ *       Devuelve en UNA respuesta los sprints y tasks de todos los proyectos del usuario
+ *       (queries bulk con IN), reemplazando el 1 + 2*N requests que hacía GlobalSearchBar.
+ *       Cada sprint/task incluye id_project para joinear con la lista de proyectos en el cliente.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sprints y tasks agregados
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/search-index", requireAuth, getSearchIndexController)
+
+/**
+ * @swagger
+ * /dashboard/projects-members:
+ *   get:
+ *     summary: Miembros de todos los proyectos del usuario en una sola respuesta
+ *     description: |
+ *       Devuelve los miembros (id_project, id_user, role) de todos los proyectos del usuario
+ *       en una query bulk con IN, reemplazando el N+1 de la lista de proyectos (un
+ *       GET /projects/:id/members por tarjeta). Proyeccion segura: sin monthly_rate ni fte.
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Miembros agregados
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/projects-members", requireAuth, getProjectsMembersController)
 
 export default router
