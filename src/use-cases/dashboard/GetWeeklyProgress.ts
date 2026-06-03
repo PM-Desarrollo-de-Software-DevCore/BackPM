@@ -82,6 +82,15 @@ export const getWeeklyProgressUseCase = async (
         projectIds = projects.map((p) => p.id_project)
     }
 
+    return computeWeeklyProgress(projectIds, weekOffset)
+}
+
+// Cómputo puro del progreso semanal (SIN validación de acceso): asume projectIds ya
+// autorizados. Lo reutiliza el endpoint agregado de worklogs para no re-validar.
+export const computeWeeklyProgress = async (
+    projectIds: string[],
+    weekOffset: number
+): Promise<WeeklyProgressResponse> => {
     const today = new Date()
     const weekStart = startOfWeekMonday(today)
     weekStart.setDate(weekStart.getDate() + weekOffset * DAYS_PER_WEEK)
