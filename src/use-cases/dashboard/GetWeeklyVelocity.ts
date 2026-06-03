@@ -61,6 +61,15 @@ export const getWeeklyVelocityUseCase = async (
         projectIds = projects.map((p) => p.id_project)
     }
 
+    return computeWeeklyVelocity(projectIds, weeks)
+}
+
+// Cómputo puro de la serie de velocidad (SIN validación de acceso): asume projectIds
+// ya autorizados. Lo reutiliza el endpoint agregado de worklogs para no re-validar.
+export const computeWeeklyVelocity = async (
+    projectIds: string[],
+    weeks: number
+): Promise<WeeklyVelocityResponse> => {
     const currentWeekStart = startOfWeekMonday(new Date())
     const oldestStart = new Date(currentWeekStart)
     oldestStart.setDate(oldestStart.getDate() - (weeks - 1) * DAYS_PER_WEEK)
