@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { requireAuth } from "../middlewares/requireAuth"
-import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController, getSearchIndexController, getProjectsMembersController, getWeeklyVelocityController } from "../controllers/dashboardController"
+import { getProjectsStatsController, getTasksStatsController, getUserTasksController, getWeeklyProgressController, getFinancialPortfolioController, getMilestonesOverviewController, getSearchIndexController, getProjectsMembersController, getWeeklyVelocityController, getWorklogOverviewController } from "../controllers/dashboardController"
 
 const router = Router()
 
@@ -526,5 +526,36 @@ router.get("/projects-members", requireAuth, getProjectsMembersController)
  *         description: Token invalido o no proporcionado
  */
 router.get("/weekly-velocity", requireAuth, getWeeklyVelocityController)
+
+/**
+ * @swagger
+ * /dashboard/worklog-overview:
+ *   get:
+ *     summary: Datos agregados de worklogs de un proyecto en UNA respuesta
+ *     description: |
+ *       Devuelve tasks + members + progreso semanal (diario) + serie de velocidad de un
+ *       proyecto en una sola respuesta, reemplazando los 4 requests en paralelo que hacía
+ *       la página de worklogs. Proyección segura de members (sin monthly_rate/fte).
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: weeks
+ *         required: false
+ *         schema: { type: integer, minimum: 1, maximum: 52, default: 5 }
+ *     responses:
+ *       200:
+ *         description: Overview de worklogs del proyecto
+ *       400:
+ *         description: projectId faltante o sin acceso
+ *       401:
+ *         description: Token invalido o no proporcionado
+ */
+router.get("/worklog-overview", requireAuth, getWorklogOverviewController)
 
 export default router
