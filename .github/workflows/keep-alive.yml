@@ -1,0 +1,21 @@
+name: Keep backend warm
+
+# Render free tier duerme el servicio tras ~15 min sin trafico, lo que provoca un
+# cold start (decenas de segundos) que el usuario sufre al abrir la app. Este job
+# pinga el endpoint /health periodicamente para mantenerlo despierto.
+#
+# Nota de costo: el plan free de Render da ~750 horas/mes; mantenerlo siempre
+# despierto consume casi todas. Para conservar horas, puedes acotar el cron a tu
+# horario activo, p.ej.: "*/13 13-4 * * 1-5" (lun-vie, ~8am-10pm CST / UTC-6).
+# En repos PUBLICOS los minutos de GitHub Actions son gratis.
+on:
+  schedule:
+    - cron: "*/13 * * * *" # cada 13 minutos
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        run: curl -fsS --max-time 30 https://backpm.onrender.com/health || true

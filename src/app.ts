@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import compression from "compression"
 import { AppDataSource } from "./infrastructure/db/DataSource"
 import authRoutes from "./routes/authRoutes"
 import projectRoutes from "./routes/projectRoutes"
@@ -25,8 +26,17 @@ import profileChangeRequestRoutes from "./routes/profileChangeRequestRoutes"
 
 const app = express()
 
+// Comprime (gzip) todas las respuestas: reduce los bytes en la red, clave en
+// Render free + DB lejana (mejora LCP/TTI percibido en el frontend).
+app.use(compression())
 app.use(cors())
 app.use(express.json())
+
+// Endpoint liviano para health-check / warmup del cold start de Render.
+// Un cron externo puede pegarle periodicamente para mantener el servicio despierto.
+app.get("/health", (_req, res) => {
+    res.json({ status: "ok" })
+})
 
 app.use("/auth", authRoutes)
 app.use("/projects", projectRoutes)
