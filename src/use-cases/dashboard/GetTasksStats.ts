@@ -1,5 +1,6 @@
 import { getProjectsByUser } from "../../infrastructure/repositories/ProjectRepository"
-import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
+import { getTasksByProjects } from "../../infrastructure/repositories/TaskRepository"
+import { groupTasksByProject } from "./groupTasksByProject"
 import { Project } from "../../entities/Project"
 import { Task, TaskPriority, TaskStatus } from "../../entities/Task"
 
@@ -86,12 +87,14 @@ export const getTasksStatsUseCase = async (userId: string): Promise<TasksStatsRe
     const projects = await getProjectsByUser(userId)
     const today = new Date()
 
-    const projectsWithTasks = await Promise.all(
-        projects.map(async (project) => ({
-            project,
-            tasks: await getTasksByProject(project.id_project)
-        }))
+    const tasksByProjectId = groupTasksByProject(
+        await getTasksByProjects(projects.map((p) => p.id_project))
     )
+
+    const projectsWithTasks = projects.map((project) => ({
+        project,
+        tasks: tasksByProjectId.get(project.id_project) ?? []
+    }))
 
     const allTasks: Task[] = projectsWithTasks.flatMap(({ tasks }) => tasks)
 

@@ -1,5 +1,6 @@
 import { getProjectsByUser } from "../../infrastructure/repositories/ProjectRepository"
-import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
+import { getTasksByProjects } from "../../infrastructure/repositories/TaskRepository"
+import { groupTasksByProject } from "./groupTasksByProject"
 import { Project, ProjectPriority, ProjectStatus } from "../../entities/Project"
 import { Task, TaskStatus } from "../../entities/Task"
 
@@ -87,11 +88,12 @@ export const getProjectsStatsUseCase = async (userId: string): Promise<ProjectsS
 
     const today = new Date()
 
-    const projectsChart: ProjectChartItem[] = await Promise.all(
-        projects.map(async (project) => {
-            const tasks = await getTasksByProject(project.id_project)
-            return buildChartItem(project, tasks, today)
-        })
+    const tasksByProjectId = groupTasksByProject(
+        await getTasksByProjects(projects.map((p) => p.id_project))
+    )
+
+    const projectsChart: ProjectChartItem[] = projects.map((project) =>
+        buildChartItem(project, tasksByProjectId.get(project.id_project) ?? [], today)
     )
 
     const summary: ProjectsStatsSummary = {
