@@ -26,6 +26,13 @@ export const getTasksByProjects = async (projectIds: string[]): Promise<Task[]> 
     return await repo.find({ where: { id_project: In(projectIds) }, order: { createdAt: "DESC" } })
 }
 
+// Variante en lote por sprint: trae en UNA query las tareas de varios sprints
+// (evita el N+1 de llamar getTasksBySprint por cada sprint en la velocity del proyecto).
+export const getTasksBySprints = async (sprintIds: string[]): Promise<Task[]> => {
+    if (sprintIds.length === 0) return []
+    return await repo.find({ where: { id_sprint: In(sprintIds) }, order: { createdAt: "DESC" } })
+}
+
 export const getNextTaskNumberForProject = async (projectId: string): Promise<number> => {
     const result = await repo.createQueryBuilder("task")
         .select("MAX(task.task_number)", "max")

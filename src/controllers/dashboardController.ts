@@ -8,6 +8,7 @@ import { getFinancialPortfolioUseCase } from "../use-cases/dashboard/GetFinancia
 import { getMilestonesOverviewUseCase } from "../use-cases/dashboard/GetMilestonesOverview"
 import { getSearchIndexUseCase } from "../use-cases/dashboard/GetSearchIndex"
 import { getProjectsMembersUseCase } from "../use-cases/dashboard/GetProjectsMembers"
+import { getWeeklyVelocityUseCase } from "../use-cases/dashboard/GetWeeklyVelocity"
 
 export const getProjectsStatsController = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -115,6 +116,23 @@ export const getProjectsMembersController = async (req: AuthenticatedRequest, re
         }
 
         const result = await getProjectsMembersUseCase(req.userId)
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getWeeklyVelocityController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const filters: { projectId?: string; weeks?: string } = {}
+        if (typeof req.query.projectId === "string") filters.projectId = req.query.projectId
+        if (typeof req.query.weeks === "string") filters.weeks = req.query.weeks
+
+        const result = await getWeeklyVelocityUseCase(req.userId, filters)
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
