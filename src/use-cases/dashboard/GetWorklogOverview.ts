@@ -1,8 +1,8 @@
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { isMemberProject, getProjectMembers } from "../../infrastructure/repositories/MemberProjectRepository"
 import { getTasksByProject } from "../../infrastructure/repositories/TaskRepository"
-import { getWeeklyProgressUseCase, WeeklyProgressResponse } from "./GetWeeklyProgress"
-import { getWeeklyVelocityUseCase, WeeklyVelocityResponse } from "./GetWeeklyVelocity"
+import { computeWeeklyProgress, WeeklyProgressResponse } from "./GetWeeklyProgress"
+import { computeWeeklyVelocity, WeeklyVelocityResponse } from "./GetWeeklyVelocity"
 import { Task } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
 
@@ -41,11 +41,12 @@ export const getWorklogOverviewUseCase = async (
         throw new Error("No tienes acceso a este proyecto")
     }
 
+    // Acceso ya validado arriba: llamamos al cómputo puro (sin re-validar el proyecto).
     const [tasks, members, weeklyProgress, weeklyVelocity] = await Promise.all([
         getTasksByProject(projectId),
         getProjectMembers(projectId),
-        getWeeklyProgressUseCase(userId, { projectId, weekOffset: "0" }),
-        getWeeklyVelocityUseCase(userId, { projectId, weeks: String(weeks) }),
+        computeWeeklyProgress([projectId], 0),
+        computeWeeklyVelocity([projectId], weeks),
     ])
 
     return {
