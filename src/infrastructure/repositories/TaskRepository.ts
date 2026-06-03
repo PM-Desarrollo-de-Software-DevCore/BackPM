@@ -119,6 +119,24 @@ export const getCompletedTasksInRange = async (
         .getMany()
 }
 
+// Tareas completadas por un conjunto de usuarios (assignedTo) en un rango.
+// Apoyada en IX_task_assignedTo. Usada para el conteo de "completadas hoy" del leaderboard.
+export const getCompletedTasksByUsersInRange = async (
+    userIds: string[],
+    rangeStart: Date,
+    rangeEnd: Date
+): Promise<Task[]> => {
+    if (userIds.length === 0) return []
+
+    return await repo.createQueryBuilder("task")
+        .where("task.assignedTo IN (:...userIds)", { userIds })
+        .andWhere("task.status = :status", { status: TaskStatus.COMPLETED })
+        .andWhere("task.completedAt IS NOT NULL")
+        .andWhere("task.completedAt >= :rangeStart", { rangeStart })
+        .andWhere("task.completedAt < :rangeEnd", { rangeEnd })
+        .getMany()
+}
+
 export const deleteTask = async (id: string): Promise<boolean> => {
     const result = await repo.delete({ id_task: id })
     return (result.affected ?? 0) > 0

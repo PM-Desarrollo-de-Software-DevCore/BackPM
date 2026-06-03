@@ -8,6 +8,7 @@ import { getTaskByIdUseCase } from "../use-cases/tasks/GetTaskById"
 import { updateTaskUseCase } from "../use-cases/tasks/UpdateTask"
 import { deleteTaskUseCase } from "../use-cases/tasks/DeleteTask"
 import { getMyTasksUseCase } from "../use-cases/tasks/GetMyTasks"
+import { getCompletedTodayCountsUseCase } from "../use-cases/tasks/GetCompletedTodayCounts"
 
 type ProjectParams = { projectId: string }
 type SprintParams = { sprintId: string }
@@ -202,6 +203,23 @@ export const getMyTasksController = async (req: AuthenticatedRequest, res: Respo
         if (typeof req.query.priority === "string") filters.priority = req.query.priority
 
         const result = await getMyTasksUseCase(req.userId, filters)
+        return res.status(200).json({ success: true, data: result })
+    } catch (error: any) {
+        return res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const getCompletedTodayCountsController = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: "Token invalido" })
+        }
+
+        const userIds = Array.isArray(req.body?.userIds)
+            ? (req.body.userIds as unknown[]).filter((id): id is string => typeof id === "string")
+            : []
+
+        const result = await getCompletedTodayCountsUseCase(userIds)
         return res.status(200).json({ success: true, data: result })
     } catch (error: any) {
         return res.status(400).json({ success: false, message: error.message })
