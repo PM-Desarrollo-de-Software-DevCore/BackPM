@@ -5,7 +5,17 @@ import { Task, TaskPriority, TaskStatus } from "../../entities/Task"
 
 const repo = AppDataSource.getRepository(TaskEntity)
 
+const validateStoryPoints = (story_points?: number | null) => {
+    if (story_points === undefined || story_points === null) return
+
+    if (!Number.isInteger(story_points) || story_points < 1 || story_points > 5) {
+        throw new Error("Los story points deben ser un número entre 1 y 5")
+    }
+}
+
 export const createTask = async (data: Omit<Task, "id_task" | "createdAt">): Promise<Task> => {
+    validateStoryPoints(data.story_points)
+
     const task = repo.create(data)
     return await repo.save(task)
 }
@@ -97,7 +107,12 @@ export const getTasksByAssignedUserWithProject = async (
     }))
 }
 
-export const updateTask = async (id: string, data: Partial<Omit<Task, "id_task" | "createdAt">>): Promise<Task | null> => {
+export const updateTask = async (
+    id: string,
+    data: Partial<Omit<Task, "id_task" | "createdAt">>
+): Promise<Task | null> => {
+    validateStoryPoints(data.story_points)
+
     await repo.update({ id_task: id }, data)
     return await getTaskById(id)
 }
