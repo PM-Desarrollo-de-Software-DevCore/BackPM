@@ -6,6 +6,14 @@ import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
 import { notifyTaskAssigned } from "../../infrastructure/services/notificationService"
 
+const validateStoryPoints = (story_points?: number | null) => {
+    if (story_points === undefined || story_points === null) return
+
+    if (!Number.isInteger(story_points) || story_points < 1 || story_points > 5) {
+        throw new Error("Los story points deben ser un número entre 1 y 5")
+    }
+}
+
 export const updateTaskUseCase = async (
     taskId: string,
     userId: string,
@@ -46,10 +54,14 @@ export const updateTaskUseCase = async (
         }
     }
 
-    if (data.story_points !== undefined && data.story_points !== null) {
-        if (!Number.isInteger(data.story_points) || data.story_points < 0) {
-            throw new Error("Los story points deben ser un entero mayor o igual a 0")
-        }
+    validateStoryPoints(data.story_points)
+
+    if (
+        data.story_points !== undefined &&
+        data.story_points !== null &&
+        userRole !== ProjectRole.PROJECT_MANAGER
+    ) {
+        throw new Error("Solo el Project Manager puede asignar story points")
     }
 
     if (data.status !== undefined && !Object.values(TaskStatus).includes(data.status)) {
