@@ -68,7 +68,7 @@ export interface LeaderboardRow {
     points: number
 }
 
-const SUM_COMPLETED_POINTS = `COALESCE(SUM(t."story_points"), 0)`
+const SUM_COMPLETED_POINTS = `COUNT(t."assignedTo")`
 
 const mapLeaderboardRows = (rows: any[]): LeaderboardRow[] =>
     rows.map((r) => ({
@@ -82,7 +82,7 @@ const mapLeaderboardRows = (rows: any[]): LeaderboardRow[] =>
 export const getLeaderboard = async (limit: number): Promise<LeaderboardRow[]> => {
     const rows = await repo
         .createQueryBuilder("u")
-        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."status" = :status`, { status: TaskStatus.COMPLETED })
+        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")
         .addSelect("u.name", "name")
         .addSelect("u.lastname", "lastname")
@@ -103,7 +103,7 @@ export const getLeaderboardByProject = async (projectId: string, limit: number):
     const rows = await repo
         .createQueryBuilder("u")
         .innerJoin("member_project", "mp", `mp."id_user" = u."id" AND mp."id_project" = :projectId`)
-        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."id_project" = :projectId AND t."status" = :status`)
+        .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."id_project" = :projectId AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")
         .addSelect("u.name", "name")
         .addSelect("u.lastname", "lastname")
