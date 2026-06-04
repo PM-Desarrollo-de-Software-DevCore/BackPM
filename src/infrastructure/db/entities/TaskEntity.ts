@@ -8,7 +8,7 @@ import { TaskStatus } from "../../../entities/Task"
 
 @Entity("task")
 @Check("CHK_task_progress_range", `"progress" >= 0 AND "progress" <= 100`)
-@Check("CHK_task_story_points_nonneg", `"story_points" >= 0`)
+@Check("CHK_task_story_points_range", `"story_points" IS NULL OR ("story_points" >= 1 AND "story_points" <= 5)`)
 export class TaskEntity {
     @PrimaryGeneratedColumn("uuid")
     id_task: string
