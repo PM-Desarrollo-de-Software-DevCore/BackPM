@@ -68,7 +68,7 @@ export interface LeaderboardRow {
     points: number
 }
 
-const SUM_COMPLETED_POINTS = `COUNT(t."assignedTo")`
+const SUM_COMPLETED_POINTS = `COALESCE(SUM(t."story_points"), 0)`
 
 const mapLeaderboardRows = (rows: any[]): LeaderboardRow[] =>
     rows.map((r) => ({
