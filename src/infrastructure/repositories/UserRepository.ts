@@ -82,6 +82,9 @@ const mapLeaderboardRows = (rows: any[]): LeaderboardRow[] =>
 export const getLeaderboard = async (limit: number): Promise<LeaderboardRow[]> => {
     const rows = await repo
         .createQueryBuilder("u")
+        .where("u.globalRole <> :adminRole", {
+            adminRole: "admin"
+        })
         .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")
         .addSelect("u.name", "name")
