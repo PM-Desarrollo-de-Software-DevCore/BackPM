@@ -105,6 +105,9 @@ export const getLeaderboard = async (limit: number): Promise<LeaderboardRow[]> =
 export const getLeaderboardByProject = async (projectId: string, limit: number): Promise<LeaderboardRow[]> => {
     const rows = await repo
         .createQueryBuilder("u")
+        .where("u.globalRole <> :adminRole", {
+            adminRole: "admin"
+        })
         .innerJoin("member_project", "mp", `mp."id_user" = u."id" AND mp."id_project" = :projectId`)
         .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."id_project" = :projectId AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")
