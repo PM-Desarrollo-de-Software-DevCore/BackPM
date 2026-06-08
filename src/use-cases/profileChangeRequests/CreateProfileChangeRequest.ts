@@ -63,7 +63,7 @@ export const createProfileChangeRequestUseCase = async (
         proposedChanges
     })
 
-    await notifyProfileChangeRequested(created.id_request, userId)
+    await notifyProfileChangeRequested(created.id_request, userId, created.proposedChanges)
 
     return created
 }
