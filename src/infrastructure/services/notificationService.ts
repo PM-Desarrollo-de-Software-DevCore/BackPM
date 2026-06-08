@@ -1,10 +1,43 @@
 import { NotificationCategory } from "../../entities/Notification"
+import { ProfileChangeFields } from "../../entities/ProfileChangeRequest"
 import { createNotification, createNotifications, countUnreadNotifications, getNotificationsForUser, hasNotificationDedupeKey, markAllNotificationsAsRead } from "../repositories/NotificationRepository"
 import { findAllUsers, findUserById } from "../repositories/UserRepository"
 import { getProjectById } from "../repositories/ProjectRepository"
 import { getTaskById, getTasksByAssignedUser } from "../repositories/TaskRepository"
 
 const fullName = (name?: string | null, lastname?: string | null) => [name, lastname].filter(Boolean).join(" ") || "Usuario"
+
+// Etiquetas legibles para los campos que un usuario puede solicitar cambiar.
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+    name: "Nombre",
+    lastname: "Apellido",
+    email: "Correo",
+    skill: "Habilidad",
+    area: "Área",
+}
+
+const formatProfileValue = (value: unknown): string => {
+    if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) {
+        return "(vacío)"
+    }
+    return String(value)
+}
+
+// Construye un resumen legible de los cambios solicitados, mostrando
+// valor actual -> valor propuesto cuando el campo ya tenía un valor.
+const describeProfileChanges = (
+    changes: ProfileChangeFields,
+    current?: { name?: string | null; lastname?: string | null; email?: string | null; skill?: string | null; area?: string | null } | null
+): string => {
+    return Object.entries(changes)
+        .map(([field, value]) => {
+            const label = PROFILE_FIELD_LABELS[field] ?? field
+            const next = formatProfileValue(value)
+            const prev = current ? formatProfileValue((current as Record<string, unknown>)[field]) : "(vacío)"
+            return prev === "(vacío)" ? `${label}: ${next}` : `${label}: ${prev} → ${next}`
+        })
+        .join(", ")
+}
 
 const notifyAdmins = async (data: {
     actorUserId: string | null
@@ -178,13 +211,21 @@ export const notifyAdminUserChange = async (params: {
     })
 }
 
-export const notifyProfileChangeRequested = async (requestId: string, actorUserId: string) => {
+export const notifyProfileChangeRequested = async (
+    requestId: string,
+    actorUserId: string,
+    proposedChanges: ProfileChangeFields
+) => {
     const actor = await findUserById(actorUserId)
+    const who = fullName(actor?.name, actor?.lastname)
+    const detail = describeProfileChanges(proposedChanges, actor)
     await notifyAdmins({
         actorUserId,
         category: NotificationCategory.PROFILE_CHANGE_REQUESTED,
         title: "Nueva solicitud de modificación de perfil",
-        message: `${fullName(actor?.name, actor?.lastname)} solicitó modificar su perfil.`,
+        message: detail
+            ? `${who} solicitó cambiar — ${detail}.`
+            : `${who} solicitó modificar su perfil.`,
         relatedType: "profile_change_request",
         relatedId: requestId,
     })
