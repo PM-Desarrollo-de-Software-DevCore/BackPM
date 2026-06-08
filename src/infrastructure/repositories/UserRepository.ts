@@ -28,6 +28,54 @@ export const findAllUsers = async (): Promise<User[]> => {
     return await repo.find()
 }
 
+// Proyeccion SQL del listado de usuarios (GET /users): solo se traen las columnas
+// necesarias. password/resetToken/resetTokenExpiry nunca salen (select:false en la entidad).
+const USER_DIRECTORY_COLUMNS = [
+    "u.id",
+    "u.email",
+    "u.name",
+    "u.lastname",
+    "u.globalRole",
+    "u.createdAt",
+    "u.skill",
+    "u.area",
+    "u.profileImageUrl",
+    "u.specialty",
+]
+// PII que solo ven los admins.
+const USER_PRIVATE_COLUMNS = ["u.phoneNumber", "u.cvUrl"]
+
+export interface FindUsersPageOptions {
+    skip?: number | undefined
+    take?: number | undefined
+    includePrivate?: boolean | undefined
+}
+
+export interface UsersPage {
+    items: User[]
+    total: number
+}
+
+// Listado con proyeccion SQL y paginacion opcional: si se pasan skip/take se aplica
+// OFFSET/FETCH en la BD (en vez de cargar toda la tabla y recortar en memoria).
+export const findUsersPage = async (
+    { skip, take, includePrivate = false }: FindUsersPageOptions = {}
+): Promise<UsersPage> => {
+    const columns = includePrivate
+        ? [...USER_DIRECTORY_COLUMNS, ...USER_PRIVATE_COLUMNS]
+        : USER_DIRECTORY_COLUMNS
+    const qb = repo
+        .createQueryBuilder("u")
+        .select(columns)
+        // Orden estable: requerido para que OFFSET/FETCH sea deterministico en SQL Server.
+        .orderBy("u.createdAt", "DESC")
+        .addOrderBy("u.id", "ASC")
+    if (typeof skip === "number") qb.skip(skip)
+    if (typeof take === "number") qb.take(take)
+    const [items, total] = await qb.getManyAndCount()
+    return { items, total }
+}
+
 export const updateUser = async (id: string, data: Partial<User>): Promise<void> => {
     await repo.update(id, data as any)
 }
