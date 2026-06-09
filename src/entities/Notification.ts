@@ -1,6 +1,8 @@
 export enum NotificationCategory {
     PROJECT_CREATED = "project_created",
     PROJECT_COMPLETED = "project_completed",
+    PROJECT_UPDATED = "project_updated",
+    PROJECT_DELETED = "project_deleted",
     PROJECT_MEMBER_ADDED = "project_member_added",
     TASK_ASSIGNED = "task_assigned",
     TASK_COMMENTED = "task_commented",

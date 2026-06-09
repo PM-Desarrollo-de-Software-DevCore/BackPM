@@ -1,7 +1,7 @@
 import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
 import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../../entities/Project"
-import { notifyProjectCompleted } from "../../infrastructure/services/notificationService"
+import { notifyProjectCompleted, notifyProjectUpdated } from "../../infrastructure/services/notificationService"
 
 export const updateProjectUseCase = async (
     projectId: string,
@@ -52,6 +52,8 @@ export const updateProjectUseCase = async (
     if (project.status !== ProjectStatus.COMPLETED && updated.status === ProjectStatus.COMPLETED) {
         await notifyProjectCompleted(projectId, userId)
     }
+
+    await notifyProjectUpdated(projectId, userId)
 
     return updated
 }

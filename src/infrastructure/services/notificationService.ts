@@ -62,6 +62,37 @@ export const notifyProjectCompleted = async (projectId: string, actorUserId: str
     })
 }
 
+export const notifyProjectUpdated = async (projectId: string, actorUserId: string) => {
+    const [actor, project] = await Promise.all([
+        findUserById(actorUserId),
+        getProjectById(projectId),
+    ])
+
+    if (!project) return
+
+    await notifyAdmins({
+        actorUserId,
+        category: NotificationCategory.PROJECT_UPDATED,
+        title: "Proyecto actualizado",
+        message: `${fullName(actor?.name, actor?.lastname)} actualizó el proyecto ${project.name}.`,
+        relatedType: "project",
+        relatedId: project.id_project,
+    })
+}
+
+export const notifyProjectDeleted = async (projectName: string, actorUserId: string) => {
+    const actor = await findUserById(actorUserId)
+
+    await notifyAdmins({
+        actorUserId,
+        category: NotificationCategory.PROJECT_DELETED,
+        title: "Proyecto eliminado",
+        message: `${fullName(actor?.name, actor?.lastname)} eliminó el proyecto ${projectName}.`,
+        relatedType: "project",
+        relatedId: null,
+    })
+}
+
 export const notifyProjectMemberAdded = async (projectId: string, userId: string, actorUserId: string) => {
     const [project, actor, recipient] = await Promise.all([
         getProjectById(projectId),
