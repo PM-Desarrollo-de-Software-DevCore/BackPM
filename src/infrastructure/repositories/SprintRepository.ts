@@ -33,3 +33,7 @@ export const deleteSprint = async (id: string): Promise<boolean> => {
     const result = await repo.delete({ id_sprint: id })
     return (result.affected ?? 0) > 0
 }
+
+export const deleteSprintsByProject = async (projectId: string): Promise<void> => {
+    await repo.delete({ id_project: projectId })
+}
