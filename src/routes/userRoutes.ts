@@ -8,6 +8,64 @@ import { uploadPDF } from "../middlewares/uploadPDF"
 
 const router = Router()
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Listar usuarios
+ *     description: |
+ *       Devuelve el directorio de usuarios. Los admins reciben campos adicionales (`phoneNumber`, `cvUrl`);
+ *       los no-admins reciben una proyeccion sin PII.
+ *       Paginacion OPT-IN: sin `page` ni `limit` se devuelve el listado completo. Si se envia `page` y/o `limit`,
+ *       se pagina en la base de datos (OFFSET/FETCH); `limit` se acota a un maximo de 100.
+ *       La respuesta siempre trae `data` como arreglo, con `total`, `page` y `limit` como metadatos aditivos.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Numero de pagina (1-based). Solo aplica si se envia page o limit.
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Tamano de pagina (maximo 100). Si se omite junto con page, se devuelven todos los usuarios.
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 total:
+ *                   type: integer
+ *                   description: Total de usuarios (sin paginar)
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                   description: Tamano de pagina aplicado. Cuando no se pagina (sin page/limit), refleja el total devuelto.
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno
+ */
 // List users (requires auth)
 router.get("/", requireAuth, listUsersController)
 
