@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import bcrypt from "bcrypt"
-import { findAllUsers, saveUser, updateUser, deleteUser, findUserById } from "../infrastructure/repositories/UserRepository"
+import { findAllUsers, saveUser, updateUser, findUserById } from "../infrastructure/repositories/UserRepository"
+import { deleteUserUseCase, isGhostUserEmail } from "../use-cases/users/DeleteUser"
 import { uploadProfileImage, deleteProfileImage, uploadCV, deleteCV, getCVSignedUrl } from "../infrastructure/cloudinary/CloudinaryClient"
 import { Specialty, User } from "../entities/User"
 import { AuthenticatedRequest } from "../middlewares/requireAuth"
@@ -88,6 +89,13 @@ export const updateUserController = async (req: AuthenticatedRequest, res: Respo
   try {
     const id = String(req.params.id)
     const data = req.body
+
+    // La cuenta del sistema (ghost) no se puede modificar.
+    const target = await findUserById(id)
+    if (target && isGhostUserEmail(target.email)) {
+      return res.status(400).json({ success: false, message: "No se puede modificar la cuenta del sistema" })
+    }
+
     if (Array.isArray(data.area)) {
       data.area = data.area.join(", ")
     }
@@ -125,7 +133,9 @@ export const deleteUserController = async (req: AuthenticatedRequest, res: Respo
   try {
     const id = String(req.params.id)
     const previous = await findUserById(id)
-    await deleteUser(id)
+    // Reasigna historial al perfil ghost y deja lo pendiente sin asignar; la
+    // guarda contra la cuenta del sistema vive dentro del use-case.
+    await deleteUserUseCase(id)
     if (req.userId && previous) {
       const actor = await getCurrentUser(req.userId)
       if (actor.role === "admin") {

@@ -1,6 +1,7 @@
+import { Not } from "typeorm"
 import { AppDataSource } from "../db/DataSource"
 import { UserEntity } from "../db/entities/UserEntity"
-import { User } from "../../entities/User"
+import { User, GHOST_USER_EMAIL } from "../../entities/User"
 import { TaskStatus } from "../../entities/Task"
 
 // Hacer un select de la tabla user
@@ -25,7 +26,8 @@ export const saveUser = async (data: Omit<User, "id" | "createdAt">): Promise<Us
 }
 
 export const findAllUsers = async (): Promise<User[]> => {
-    return await repo.find()
+    // El perfil ghost del sistema se excluye de los listados (no es seleccionable).
+    return await repo.find({ where: { email: Not(GHOST_USER_EMAIL) } })
 }
 
 export const updateUser = async (id: string, data: Partial<User>): Promise<void> => {
@@ -85,6 +87,7 @@ export const getLeaderboard = async (limit: number): Promise<LeaderboardRow[]> =
         .where("u.globalRole <> :adminRole", {
             adminRole: "admin"
         })
+        .andWhere("u.email <> :ghostEmail", { ghostEmail: GHOST_USER_EMAIL })
         .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")
         .addSelect("u.name", "name")
@@ -108,6 +111,7 @@ export const getLeaderboardByProject = async (projectId: string, limit: number):
         .where("u.globalRole <> :adminRole", {
             adminRole: "admin"
         })
+        .andWhere("u.email <> :ghostEmail", { ghostEmail: GHOST_USER_EMAIL })
         .innerJoin("member_project", "mp", `mp."id_user" = u."id" AND mp."id_project" = :projectId`)
         .leftJoin("task", "t", `t."assignedTo" = u."id" AND t."id_project" = :projectId AND t."completedAt" IS NOT NULL`)
         .select("u.id", "id")

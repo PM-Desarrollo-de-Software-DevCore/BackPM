@@ -1,6 +1,8 @@
 import { updateProject, getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { getUserRoleInProject } from "../../infrastructure/repositories/MemberProjectRepository"
+import { findUserById } from "../../infrastructure/repositories/UserRepository"
 import { ProjectPriority, ProjectStatus, ProjectMethodology, ProjectBillingModel } from "../../entities/Project"
+import { GlobalRole } from "../../entities/User"
 import { notifyProjectCompleted, notifyProjectUpdated } from "../../infrastructure/services/notificationService"
 
 export const updateProjectUseCase = async (
@@ -29,8 +31,13 @@ export const updateProjectUseCase = async (
         throw new Error("Proyecto no encontrado")
     }
 
-    const role = await getUserRoleInProject(userId, projectId)
+    const [role, requester] = await Promise.all([
+        getUserRoleInProject(userId, projectId),
+        findUserById(userId),
+    ])
+    const isGlobalAdmin = requester?.globalRole === GlobalRole.ADMIN
     const canEdit =
+        isGlobalAdmin ||
         project.createdBy === userId ||
         role === "project_manager" ||
         role === "scrum_master"
