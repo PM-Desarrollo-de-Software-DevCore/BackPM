@@ -3,6 +3,11 @@ export enum GlobalRole {
     USER = "user"
 }
 
+// Email reservado del perfil "ghost" del sistema: marcador único que absorbe el
+// historial de los usuarios eliminados. No se puede iniciar sesión, eliminar ni
+// modificar, y se excluye de los listados de usuarios.
+export const GHOST_USER_EMAIL = "cuenta-eliminada@frontpm.system"
+
 export enum Specialty {
     FRONTEND = "frontend",
     BACKEND = "backend",

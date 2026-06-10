@@ -4,7 +4,7 @@ import { getSprintById } from "../../infrastructure/repositories/SprintRepositor
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { TaskPriority, TaskStatus } from "../../entities/Task"
 import { ProjectRole } from "../../entities/MemberProject"
-import { notifyTaskAssigned } from "../../infrastructure/services/notificationService"
+import { notifyTaskAssigned, notifyTaskCompleted } from "../../infrastructure/services/notificationService"
 
 const validateStoryPoints = (story_points?: number | null) => {
     if (story_points === undefined || story_points === null) return
@@ -99,6 +99,15 @@ export const updateTaskUseCase = async (
     const assigneeChanged = data.assignedTo !== undefined && data.assignedTo !== task.assignedTo
     if (finalAssignee && assigneeChanged) {
         await notifyTaskAssigned(taskId, finalAssignee, userId)
+    }
+
+    // Aviso al asignado cuando la tarea pasa a completada.
+    const justCompleted =
+        data.status !== undefined &&
+        data.status !== task.status &&
+        data.status === TaskStatus.COMPLETED
+    if (justCompleted) {
+        await notifyTaskCompleted(taskId, userId)
     }
 
     return updated
