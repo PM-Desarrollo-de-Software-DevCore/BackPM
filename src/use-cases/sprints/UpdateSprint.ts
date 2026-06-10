@@ -3,6 +3,7 @@ import { getUserRoleInProject } from "../../infrastructure/repositories/MemberPr
 import { getProjectById } from "../../infrastructure/repositories/ProjectRepository"
 import { SprintStatus } from "../../entities/Sprint"
 import { ProjectRole } from "../../entities/MemberProject"
+import { notifySprintCompleted } from "../../infrastructure/services/notificationService"
 
 export const updateSprintUseCase = async (
     sprintId: string,
@@ -39,6 +40,15 @@ export const updateSprintUseCase = async (
     const updated = await updateSprint(sprintId, data)
     if (!updated) {
         throw new Error("No se pudo actualizar el sprint")
+    }
+
+    // Aviso a los miembros del proyecto cuando el sprint pasa a finalizado.
+    const justFinished =
+        data.status !== undefined &&
+        data.status !== sprint.status &&
+        data.status === SprintStatus.FINISHED
+    if (justFinished) {
+        await notifySprintCompleted(sprintId, userId)
     }
 
     return updated
