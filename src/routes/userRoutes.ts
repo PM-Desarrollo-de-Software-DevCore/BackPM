@@ -3,6 +3,7 @@ import { listUsersController, createUserController, updateUserController, delete
 import { getMyTasksController } from "../controllers/taskController"
 import { requireAuth } from "../middlewares/requireAuth"
 import { requireSelfOrAdmin } from "../middlewares/requireSelfOrAdmin"
+import { requireAdmin } from "../middlewares/requireAdmin"
 import { uploadProfileImage } from "../middlewares/uploadProfileImage"
 import { uploadPDF } from "../middlewares/uploadPDF"
 
@@ -103,14 +104,15 @@ router.get("/", requireAuth, listUsersController)
  */
 router.get("/me/tasks", requireAuth, getMyTasksController)
 
-// Create user (admin or open depending on your policy)
-router.post("/", requireAuth, createUserController)
+// Crear usuario: solo admins (el alta de cuenta propia va por POST /auth/register).
+router.post("/", requireAuth, requireAdmin, createUserController)
 
-// Update user
-router.put("/:id", requireAuth, updateUserController)
+// Actualizar usuario: solo admins. Los usuarios normales piden cambios de su
+// perfil via POST /profile-change-requests (requiere aprobacion de un admin).
+router.put("/:id", requireAuth, requireAdmin, updateUserController)
 
-// Delete user
-router.delete("/:id", requireAuth, deleteUserController)
+// Eliminar usuario: solo admins.
+router.delete("/:id", requireAuth, requireAdmin, deleteUserController)
 
 /**
  * @swagger
