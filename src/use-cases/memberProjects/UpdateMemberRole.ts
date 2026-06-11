@@ -10,6 +10,7 @@ export interface MemberUpdates {
     role?: ProjectRole
     fte?: number | null
     monthly_rate?: number | null
+    sale_rate?: number | null
 }
 
 export const updateMemberUseCase = async (
@@ -48,6 +49,7 @@ export const updateMemberUseCase = async (
     if (updates.role !== undefined) data.role = updates.role
     if (updates.fte !== undefined) data.fte = updates.fte
     if (updates.monthly_rate !== undefined) data.monthly_rate = updates.monthly_rate
+    if (updates.sale_rate !== undefined) data.sale_rate = updates.sale_rate
 
     return await updateMember(userIdToUpdate, projectId, data)
 }

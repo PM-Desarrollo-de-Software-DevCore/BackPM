@@ -21,6 +21,7 @@ export const addMemberController = async (req: AuthenticatedRequest, res: Respon
         const role = req.body.role as ProjectRole
         const fte = (req.body.fte ?? null) as number | null
         const monthlyRate = (req.body.monthly_rate ?? null) as number | null
+        const saleRate = (req.body.sale_rate ?? null) as number | null
 
         const result = await addMemberToProjectUseCase(
             projectId,
@@ -28,6 +29,7 @@ export const addMemberController = async (req: AuthenticatedRequest, res: Respon
             role,
             fte,
             monthlyRate,
+            saleRate,
             req.userId,
             user.role as GlobalRole
         )

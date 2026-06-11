@@ -15,6 +15,7 @@ export interface MemberAddOp {
     role: ProjectRole
     fte?: number | null
     monthly_rate?: number | null
+    sale_rate?: number | null
 }
 
 export interface MemberUpdateOp {
@@ -22,6 +23,7 @@ export interface MemberUpdateOp {
     role: ProjectRole
     fte?: number | null
     monthly_rate?: number | null
+    sale_rate?: number | null
 }
 
 export interface SyncMembersInput {
@@ -139,6 +141,7 @@ export const syncProjectMembersUseCase = async (
             const data: Partial<MemberProjectEntity> = { role: op.role }
             if (op.fte !== undefined) data.fte = op.fte
             if (op.monthly_rate !== undefined) data.monthly_rate = op.monthly_rate
+            if (op.sale_rate !== undefined) data.sale_rate = op.sale_rate
             await repo.update({ id_user: op.userId, id_project: projectId }, data)
         }
         for (const op of add) {
@@ -148,6 +151,7 @@ export const syncProjectMembersUseCase = async (
                 role: op.role,
                 fte: op.fte ?? null,
                 monthly_rate: op.monthly_rate ?? null,
+                sale_rate: op.sale_rate ?? null,
             })
             await repo.save(member)
             addedUserIds.push(op.userId)
