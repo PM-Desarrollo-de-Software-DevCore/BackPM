@@ -3,6 +3,7 @@ import { requireAuth } from "../middlewares/requireAuth"
 import { validateCreateInvoice, validateUpdateInvoice } from "../middlewares/validateInvoice"
 import {
     createInvoiceController,
+    getSuggestedInvoiceAmountController,
     getProjectInvoicesController,
     updateInvoiceController,
     deleteInvoiceController
@@ -79,6 +80,42 @@ export const invoiceRouter = Router()
  *         description: Error de validacion o permisos
  */
 projectInvoiceRouter.post("/:projectId/invoices", requireAuth, validateCreateInvoice, createInvoiceController)
+
+/**
+ * @swagger
+ * /projects/{projectId}/invoices/suggested-amount:
+ *   get:
+ *     summary: Monto sugerido (auto-calculo T&M) de un periodo, sin crear la factura (admin o PM)
+ *     description: Suma de horas registradas por cada miembro en el periodo x su tarifa de venta (sale_rate).
+ *     tags: [Invoices]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: period_start
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: period_end
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *     responses:
+ *       200:
+ *         description: "Devuelve { total, lines: [{ userId, hours, sale_rate, subtotal }], membersMissingRate }"
+ *       400:
+ *         description: Parametros invalidos o sin permiso
+ */
+projectInvoiceRouter.get("/:projectId/invoices/suggested-amount", requireAuth, getSuggestedInvoiceAmountController)
 
 /**
  * @swagger

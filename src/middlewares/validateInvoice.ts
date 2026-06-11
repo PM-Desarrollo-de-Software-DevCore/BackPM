@@ -4,7 +4,8 @@ import { z } from "zod"
 const statusSchema = z.enum(["draft", "sent", "paid"], { message: "Estado invalido" })
 
 const createInvoiceSchema = z.object({
-    amount: z.number().positive("El monto debe ser mayor a 0"),
+    // Opcional: si se omite, el backend lo auto-calcula para proyectos T&M con periodo.
+    amount: z.number().positive("El monto debe ser mayor a 0").optional(),
     status: statusSchema.optional(),
     concept: z.string().optional().nullable(),
     issue_date: z.coerce.date({ message: "issue_date invalida" }),

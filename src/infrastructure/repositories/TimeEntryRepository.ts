@@ -1,3 +1,4 @@
+import { Between } from "typeorm"
 import { AppDataSource } from "../db/DataSource"
 import { TimeEntryEntity } from "../db/entities/TimeEntryEntity"
 import { TimeEntry } from "../../entities/TimeEntry"
@@ -23,6 +24,19 @@ export const getTimeEntriesByTask = async (taskId: string) => {
 
 export const getTimeEntriesByProject = async (projectId: string): Promise<TimeEntry[]> => {
     return await repo.find({ where: { id_project: projectId }, order: { work_date: "ASC" } })
+}
+
+// Horas registradas de un proyecto dentro de un rango de fechas (inclusive en ambos
+// extremos). Base del auto-calculo de facturas T&M.
+export const getTimeEntriesByProjectAndPeriod = async (
+    projectId: string,
+    start: Date,
+    end: Date
+): Promise<TimeEntry[]> => {
+    return await repo.find({
+        where: { id_project: projectId, work_date: Between(start, end) },
+        order: { work_date: "ASC" }
+    })
 }
 
 export const updateTimeEntry = async (
