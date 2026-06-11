@@ -2,11 +2,9 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-
-    // ✅ CAMBIO CLAVE
     "module": "CommonJS",
     "moduleResolution": "bundler",
-    "target": "ES2020",          // esnext puede dar problemas en Node
+    "target": "ES2020",         
 
     "esModuleInterop": true,
     "sourceMap": true,
@@ -17,7 +15,7 @@
     "exactOptionalPropertyTypes": true,
 
     "strict": true,
-    // "jsx": "react-jsx",       // ❌ Quita esto, es un backend
+    
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "skipLibCheck": true,
