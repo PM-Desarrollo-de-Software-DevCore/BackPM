@@ -14,6 +14,7 @@ export const addMemberToProjectUseCase = async (
     roleToAssign: ProjectRole,
     fte: number | null,
     monthlyRate: number | null,
+    saleRate: number | null,
     adminUserId: string,
     adminGlobalRole: GlobalRole
 ): Promise<any> => {
@@ -48,7 +49,7 @@ export const addMemberToProjectUseCase = async (
         }
     }
 
-    const member = await addMemberToProject(userIdToAdd, projectId, roleToAssign, fte, monthlyRate)
+    const member = await addMemberToProject(userIdToAdd, projectId, roleToAssign, fte, monthlyRate, saleRate)
     await notifyProjectMemberAdded(projectId, userIdToAdd, adminUserId)
     return member
 }
