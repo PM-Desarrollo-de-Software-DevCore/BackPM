@@ -37,6 +37,11 @@ export class MemberProjectEntity {
     @Column({ type: "float", nullable: true })
     monthly_rate: number | null
 
+    // Tarifa de venta por HORA facturada al cliente (revenue, T&M). Dato sensible: solo admin/PM.
+    // Independiente de monthly_rate (costo); juntas permiten margen. NO se usa en EVM (cost-only).
+    @Column({ type: "float", nullable: true })
+    sale_rate: number | null
+
     @CreateDateColumn()
     createdAt: Date
 }

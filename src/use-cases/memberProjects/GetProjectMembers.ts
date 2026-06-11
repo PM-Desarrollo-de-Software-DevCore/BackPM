@@ -15,7 +15,7 @@ export const getProjectMembersUseCase = async (
 
     const members = await getProjectMembers(projectId)
 
-    // El monthly_rate es sensible (~ sueldo): solo lo ven el admin global y el project_manager del proyecto.
+    // monthly_rate (costo) y sale_rate (tarifa de venta) son sensibles: solo los ven el admin global y el PM del proyecto.
     const requesterProjectRole = await getUserRoleInProject(requestingUserId, projectId)
     const canSeeRate = requesterGlobalRole === "admin" || requesterProjectRole === ProjectRole.PROJECT_MANAGER
 
@@ -23,5 +23,5 @@ export const getProjectMembersUseCase = async (
         return members
     }
 
-    return members.map((member) => ({ ...member, monthly_rate: null }))
+    return members.map((member) => ({ ...member, monthly_rate: null, sale_rate: null }))
 }

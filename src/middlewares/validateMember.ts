@@ -8,22 +8,25 @@ const roleSchema = z.enum(["project_manager", "scrum_master", "developer", "team
 })
 
 const fteSchema = z.number().positive("El FTE debe ser mayor a 0").max(1, "El FTE no puede ser mayor a 1").nullable().optional()
-const monthlyRateSchema = z.number().nonnegative("El rate no puede ser negativo").nullable().optional()
+// Mismo criterio para costo (monthly_rate) y tarifa de venta (sale_rate): >= 0, opcional, nullable.
+const rateSchema = z.number().nonnegative("El rate no puede ser negativo").nullable().optional()
 
 const addMemberBodySchema = z.object({
     userId: z.string().uuid("userId invalido"),
     role: roleSchema,
     fte: fteSchema,
-    monthly_rate: monthlyRateSchema
+    monthly_rate: rateSchema,
+    sale_rate: rateSchema
 })
 
 const updateMemberBodySchema = z.object({
     role: roleSchema.optional(),
     fte: fteSchema,
-    monthly_rate: monthlyRateSchema
+    monthly_rate: rateSchema,
+    sale_rate: rateSchema
 }).refine(
-    (data) => data.role !== undefined || data.fte !== undefined || data.monthly_rate !== undefined,
-    { message: "Debes enviar al menos un campo para actualizar (role, fte o monthly_rate)" }
+    (data) => data.role !== undefined || data.fte !== undefined || data.monthly_rate !== undefined || data.sale_rate !== undefined,
+    { message: "Debes enviar al menos un campo para actualizar (role, fte, monthly_rate o sale_rate)" }
 )
 
 export const validateProjectIdParam = (req: Request, res: Response, next: NextFunction) => {
